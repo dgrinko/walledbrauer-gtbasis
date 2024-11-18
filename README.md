@@ -3,3 +3,5 @@
 * "Mixed Schur Tools.wl" provides a Wolfram package for Mixed Schur-Weyl duality related capabilities.
 
 * "Matrix Units.nb" provides an implementation for matrix units of the partially transposed permutation matrix algebras in the Gelfand-Tsetlin basis.
+
+* "Bratteli diagram.nb" constructs a Bratteli diagram partially transposed permutation matrix algebras.

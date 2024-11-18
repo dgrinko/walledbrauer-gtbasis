@@ -1,0 +1,1023 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 14.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     43399,       1015]
+NotebookOptionsPosition[     42483,        991]
+NotebookOutlinePosition[     42879,       1007]
+CellTagsIndexPosition[     42836,       1004]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{"Get", "[", 
+  RowBox[{
+   RowBox[{"NotebookDirectory", "[", "]"}], "<>", 
+   "\"\</Mixed Schur Tools.wl\>\""}], "]"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.932668325675636*^9, 3.932668358358268*^9}, {
+  3.932670327363048*^9, 3.932670332366967*^9}},
+ CellLabel->"In[6]:=",ExpressionUUID->"65415d81-acf7-4526-92b7-9abdffff34a5"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"n", ",", "m", ",", "d"}], "}"}], " ", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{"3", ",", "2", ",", "3"}], "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.932667162781701*^9, 3.932667175523767*^9}, {
+  3.9326672367506733`*^9, 3.9326673568320704`*^9}, {3.932667801621275*^9, 
+  3.932667807480612*^9}, {3.932668110639894*^9, 3.932668134459774*^9}, {
+  3.932668170017038*^9, 3.932668173557853*^9}, {3.932668236362101*^9, 
+  3.932668247954825*^9}, {3.940917224094899*^9, 3.940917231964325*^9}},
+ CellLabel->"In[7]:=",ExpressionUUID->"62497f09-1ebf-4cd3-9e8b-6077f6c53575"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"BratteliDiagramWBALabelled", "[", 
+  RowBox[{"3", ",", "2", ",", "3"}], "]"}]], "Input",
+ CellChangeTimes->{{3.940917237994307*^9, 3.940917260925131*^9}},
+ CellLabel->"In[10]:=",ExpressionUUID->"866535f1-e6a5-40bc-8c4c-6dbb82688e5a"],
+
+Cell[BoxData[
+ GraphicsBox[
+  NamespaceBox["NetworkGraphics",
+   DynamicModuleBox[{Typeset`graph = HoldComplete[
+     Graph[{{{0, 0, 0}, 0}, {{1, 0, 0}, 1}, {{2, 0, 0}, 2}, {{1, 1, 0}, 2}, {{
+        3, 0, 0}, 3}, {{2, 1, 0}, 3}, {{1, 1, 1}, 3}, {{3, 0, -1}, 4}, {{2, 
+        1, -1}, 4}, {{2, 0, 0}, 4}, {{1, 1, 0}, 4}, {{3, 0, -2}, 5}, {{
+        3, -1, -1}, 5}, {{2, 1, -2}, 5}, {{2, 0, -1}, 5}, {{1, 1, -1}, 5}, {{
+        1, 0, 0}, 5}}, {
+       SparseArray[
+       Automatic, {17, 17}, 0, {
+        1, {{0, 1, 3, 5, 7, 9, 12, 13, 16, 19, 21, 23, 23, 23, 23, 23, 23, 
+          23}, {{2}, {3}, {4}, {5}, {6}, {6}, {7}, {8}, {10}, {9}, {10}, {
+          11}, {11}, {12}, {13}, {15}, {14}, {15}, {16}, {15}, {17}, {16}, {
+          17}}}, Pattern}], Null}, {
+      GraphLayout -> "LayeredDigraphEmbedding", 
+       VertexLabels -> {{{2, 0, 0}, 2} -> Placed[
+           Grid[{{" ", " "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True, {1, 2} -> True}}], 
+           Center], {{1, 1, 0}, 4} -> Placed[
+           Grid[{{" "}, {" "}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True, {2, 1} -> True}}], 
+           Center], {{3, 0, -2}, 5} -> Placed[
+           
+           Grid[{{" ", " ", " ", " ", " "}, {" ", " "}, {" ", " ", " ", " "}},
+             Dividers -> {{3 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 3} -> True, {1, 4} -> True, {1, 5} -> 
+               True, {3, 1} -> True, {3, 2} -> True}}], Center], {{3, 0, 0}, 
+           3} -> Placed[
+           Grid[{{" ", " ", " "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 1} -> True, {1, 2} -> True, {1, 3} -> True}}], 
+           Center], {{1, 1, -1}, 5} -> Placed[
+           Grid[{{" ", " "}, {" ", " "}, {" ", " "}}, Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {2, 2} -> True, {3, 1} -> True}}], 
+           Center], {{1, 0, 0}, 5} -> Placed[
+           Grid[{{" "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True}}], Center], {{3, 0, -1}, 
+           4} -> Placed[
+           Grid[{{" ", " ", " ", " "}, {" "}, {" ", " "}}, Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+               True, {3, 1} -> True}}], Center], {{1, 0, 0}, 1} -> Placed[
+           Grid[{{" "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True}}], Center], {{1, 1, 1}, 3} -> 
+         Placed[
+           Grid[{{" "}, {" "}, {" "}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 1} -> True, {2, 1} -> True, {3, 1} -> True}}], 
+           Center], {{2, 1, -1}, 4} -> Placed[
+           Grid[{{" ", " ", " "}, {" ", " "}, {" ", " "}}, Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {1, 3} -> True, {2, 2} -> 
+               True, {3, 1} -> True}}], Center], {{2, 1, -2}, 5} -> Placed[
+           
+           Grid[{{" ", " ", " ", " "}, {" ", " ", " "}, {" ", " ", " ", " "}},
+             Dividers -> {{3 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 3} -> True, {1, 4} -> True, {2, 3} -> 
+               True, {3, 1} -> True, {3, 2} -> True}}], Center], {{2, 1, 0}, 
+           3} -> Placed[
+           Grid[{{" ", " "}, {" "}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 1} -> True, {1, 2} -> True, {2, 1} -> True}}], 
+           Center], {{2, 0, 0}, 4} -> Placed[
+           Grid[{{" ", " "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True, {1, 2} -> True}}], 
+           Center], {{0, 0, 0}, 0} -> 
+         Placed[$CellContext`\[EmptySet], Center], {{1, 1, 0}, 2} -> Placed[
+           Grid[{{" "}, {" "}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True, {2, 1} -> True}}], 
+           Center], {{2, 0, -1}, 5} -> Placed[
+           Grid[{{" ", " ", " "}, {" "}, {" ", " "}}, Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {1, 3} -> True, {3, 1} -> True}}], 
+           Center], {{3, -1, -1}, 5} -> Placed[
+           
+           Grid[{{" ", " ", " ", " "}, {" ", " "}, {" ", " "}}, 
+            Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+               True, {2, 1} -> True, {3, 1} -> True}}], Center]}, VertexShape -> {
+         Graphics[{
+           GrayLevel[0, 0], 
+           Disk[{0, 0}]}]}, VertexSize -> {0.4}, VertexStyle -> {
+         RGBColor[0.87, 0.94, 1]}}]]}, 
+    TagBox[GraphicsGroupBox[{
+       {Hue[0.6, 0.7, 0.5], Opacity[0.7], Arrowheads[Medium], 
+        ArrowBox[{{0., 5.}, {0., 4.}}, 0.2], 
+        ArrowBox[{{0., 4.}, {-1., 3.}}, 0.2], 
+        ArrowBox[{{0., 4.}, {0., 3.}}, 0.2], 
+        ArrowBox[{{-1., 3.}, {-2., 2.}}, 0.2], 
+        ArrowBox[{{-1., 3.}, {-1., 2.}}, 0.2], 
+        ArrowBox[{{0., 3.}, {-1., 2.}}, 0.2], 
+        ArrowBox[{{0., 3.}, {0., 2.}}, 0.2], 
+        ArrowBox[{{-2., 2.}, {-3., 1.}}, 0.2], 
+        ArrowBox[{{-2., 2.}, {-2., 1.}}, 0.2], 
+        ArrowBox[{{-1., 2.}, {-1., 1.}}, 0.2], 
+        ArrowBox[{{-1., 2.}, {-2., 1.}}, 0.2], 
+        ArrowBox[{{-1., 2.}, {0., 1.}}, 0.2], 
+        ArrowBox[{{0., 2.}, {0., 1.}}, 0.2], 
+        ArrowBox[{{-3., 1.}, {-4., 0.}}, 0.2], 
+        ArrowBox[{{-3., 1.}, {-3., 0.}}, 0.2], 
+        ArrowBox[{{-3., 1.}, {-2., 0.}}, 0.2], 
+        ArrowBox[{{-1., 1.}, {-1., 0.}}, 0.2], 
+        ArrowBox[{{-1., 1.}, {-2., 0.}}, 0.2], 
+        ArrowBox[{{-1., 1.}, {1., 0.}}, 0.2], 
+        ArrowBox[{{-2., 1.}, {-2., 0.}}, 0.2], 
+        ArrowBox[{{-2., 1.}, {0., 0.}}, 0.2], 
+        ArrowBox[{{0., 1.}, {1., 0.}}, 0.2], 
+        ArrowBox[{{0., 1.}, {0., 0.}}, 0.2]}, 
+       {RGBColor[0.87, 0.94, 1], EdgeForm[{GrayLevel[0], Opacity[
+        0.7]}], {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {0., 5.}, 
+          Automatic, {0.4, 0.4}], InsetBox["\[EmptySet]", {0., 5.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {0., 4.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>"},
+             {""},
+             {""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {0., 4.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-1., 3.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>"},
+             {"", ""},
+             {"", ""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {1, 2} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-1., 3.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {0., 3.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>"},
+             {"\<\" \"\>"},
+             {""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {2, 1} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {0., 3.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-2., 2.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>"},
+             {"", "", ""},
+             {"", "", ""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {1, 2} -> True, {1, 3} -> 
+                True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-2., 2.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-1., 2.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>"},
+             {"\<\" \"\>", ""},
+             {"", ""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {1, 2} -> True, {2, 1} -> 
+                True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-1., 2.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {0., 2.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>"},
+             {"\<\" \"\>"},
+             {"\<\" \"\>"}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {2, 1} -> True, {3, 1} -> 
+                True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {0., 2.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-3., 1.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>", "\<\" \"\>"},
+             {"\<\" \"\>", "", "", ""},
+             {"\<\" \"\>", "\<\" \"\>", "", ""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+                True, {3, 1} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-3., 1.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-1., 1.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>"},
+             {"\<\" \"\>", "\<\" \"\>", ""},
+             {"\<\" \"\>", "\<\" \"\>", ""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {1, 3} -> True, {2, 2} -> 
+                True, {3, 1} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-1., 1.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-2., 1.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>"},
+             {"", ""},
+             {"", ""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {1, 2} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-2., 1.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {0., 1.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>"},
+             {"\<\" \"\>"},
+             {""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {2, 1} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {0., 1.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-4., 0.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>", "\<\" \"\>", "\<\" \"\>"},
+             {"\<\" \"\>", "\<\" \"\>", "", "", ""},
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>", "\<\" \"\>", ""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {3 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 3} -> True, {1, 4} -> True, {1, 5} -> 
+                True, {3, 1} -> True, {3, 2} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-4., 0.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-3., 0.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>", "\<\" \"\>"},
+             {"\<\" \"\>", "\<\" \"\>", "", ""},
+             {"\<\" \"\>", "\<\" \"\>", "", ""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+                True, {2, 1} -> True, {3, 1} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-3., 0.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-1., 0.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>", "\<\" \"\>"},
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>", ""},
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>", "\<\" \"\>"}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {3 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 3} -> True, {1, 4} -> True, {2, 3} -> 
+                True, {3, 1} -> True, {3, 2} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-1., 0.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {-2., 0.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>", "\<\" \"\>"},
+             {"\<\" \"\>", "", ""},
+             {"\<\" \"\>", "\<\" \"\>", ""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {1, 3} -> True, {3, 1} -> 
+                True}},
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {-2., 0.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {1., 0.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>", "\<\" \"\>"},
+             {"\<\" \"\>", "\<\" \"\>"},
+             {"\<\" \"\>", "\<\" \"\>"}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {2, 2} -> True, {3, 1} -> 
+                True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {1., 0.},
+          BaseStyle->"Graphics"]}, {InsetBox[
+          GraphicsBox[
+           {GrayLevel[0], Opacity[0], DiskBox[{0, 0}]}], {0., 0.}, 
+          Automatic, {0.4, 0.4}], InsetBox[
+          TagBox[GridBox[{
+             {"\<\" \"\>"},
+             {""},
+             {""}
+            },
+            AutoDelete->False,
+            GridBoxDividers->{"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}},
+            
+            GridBoxFrame->{
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+           "Grid"], {0., 0.},
+          BaseStyle->"Graphics"]}}}],
+     MouseAppearanceTag["NetworkGraphics"]],
+    AllowKernelInitialization->False]],
+  DefaultBaseStyle->"NetworkGraphics",
+  FormatType->TraditionalForm,
+  FrameTicks->None,
+  ImageSize->{475.34751892089844`, 475.}]], "Output",
+ CellChangeTimes->{{3.940917248310171*^9, 3.940917261370639*^9}},
+ CellLabel->"Out[10]=",ExpressionUUID->"4dcf49ef-fdff-419e-bc80-502b1ad0dc3d"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{
+   "Hover", " ", "over", " ", "the", " ", "node", " ", "to", " ", "see", " ", 
+    "the", " ", "label"}], " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"BratteliDiagramWBA", "[", 
+   RowBox[{"3", ",", "2", ",", "3"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.940917269507115*^9, 
+  3.9409172926553593`*^9}},ExpressionUUID->"e39fbc3e-b6bf-4d9e-a4f4-\
+2b889cab1930"],
+
+Cell[BoxData[
+ GraphicsBox[
+  NamespaceBox["NetworkGraphics",
+   DynamicModuleBox[{Typeset`graph = HoldComplete[
+     Graph[{{{0, 0, 0}, 0}, {{1, 0, 0}, 1}, {{2, 0, 0}, 2}, {{1, 1, 0}, 2}, {{
+        3, 0, 0}, 3}, {{2, 1, 0}, 3}, {{1, 1, 1}, 3}, {{3, 0, -1}, 4}, {{2, 
+        1, -1}, 4}, {{2, 0, 0}, 4}, {{1, 1, 0}, 4}, {{3, 0, -2}, 5}, {{
+        3, -1, -1}, 5}, {{2, 1, -2}, 5}, {{2, 0, -1}, 5}, {{1, 1, -1}, 5}, {{
+        1, 0, 0}, 5}}, {
+       SparseArray[
+       Automatic, {17, 17}, 0, {
+        1, {{0, 1, 3, 5, 7, 9, 12, 13, 16, 19, 21, 23, 23, 23, 23, 23, 23, 
+          23}, {{2}, {3}, {4}, {5}, {6}, {6}, {7}, {8}, {10}, {9}, {10}, {
+          11}, {11}, {12}, {13}, {15}, {14}, {15}, {16}, {15}, {17}, {16}, {
+          17}}}, Pattern}], Null}, {
+      GraphLayout -> "LayeredDigraphEmbedding", ImageSize -> Small, 
+       VertexLabels -> {{{2, 0, 0}, 2} -> Placed[
+           Grid[{{" ", " "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True, {1, 2} -> True}}], 
+           Tooltip], {{1, 1, 0}, 4} -> Placed[
+           Grid[{{" "}, {" "}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True, {2, 1} -> True}}], 
+           Tooltip], {{3, 0, -2}, 5} -> Placed[
+           
+           Grid[{{" ", " ", " ", " ", " "}, {" ", " "}, {" ", " ", " ", " "}},
+             Dividers -> {{3 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 3} -> True, {1, 4} -> True, {1, 5} -> 
+               True, {3, 1} -> True, {3, 2} -> True}}], Tooltip], {{3, 0, 0}, 
+           3} -> Placed[
+           Grid[{{" ", " ", " "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 1} -> True, {1, 2} -> True, {1, 3} -> True}}], 
+           Tooltip], {{1, 1, -1}, 5} -> Placed[
+           Grid[{{" ", " "}, {" ", " "}, {" ", " "}}, Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {2, 2} -> True, {3, 1} -> True}}], 
+           Tooltip], {{1, 0, 0}, 5} -> Placed[
+           Grid[{{" "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True}}], Tooltip], {{3, 0, -1}, 
+           4} -> Placed[
+           Grid[{{" ", " ", " ", " "}, {" "}, {" ", " "}}, Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+               True, {3, 1} -> True}}], Tooltip], {{1, 0, 0}, 1} -> Placed[
+           Grid[{{" "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True}}], Tooltip], {{1, 1, 1}, 
+           3} -> Placed[
+           Grid[{{" "}, {" "}, {" "}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 1} -> True, {2, 1} -> True, {3, 1} -> True}}], 
+           Tooltip], {{2, 1, -1}, 4} -> Placed[
+           Grid[{{" ", " ", " "}, {" ", " "}, {" ", " "}}, Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {1, 3} -> True, {2, 2} -> 
+               True, {3, 1} -> True}}], Tooltip], {{2, 1, -2}, 5} -> Placed[
+           
+           Grid[{{" ", " ", " ", " "}, {" ", " ", " "}, {" ", " ", " ", " "}},
+             Dividers -> {{3 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 3} -> True, {1, 4} -> True, {2, 3} -> 
+               True, {3, 1} -> True, {3, 2} -> True}}], Tooltip], {{2, 1, 0}, 
+           3} -> Placed[
+           Grid[{{" ", " "}, {" "}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 1} -> True, {1, 2} -> True, {2, 1} -> True}}], 
+           Tooltip], {{2, 0, 0}, 4} -> Placed[
+           Grid[{{" ", " "}, {}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True, {1, 2} -> True}}], 
+           Tooltip], {{0, 0, 0}, 0} -> 
+         Placed[$CellContext`\[EmptySet], Tooltip], {{1, 1, 0}, 2} -> Placed[
+           Grid[{{" "}, {" "}, {}}, Dividers -> {{1 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {None, None, {{1, 1} -> True, {2, 1} -> True}}], 
+           Tooltip], {{2, 0, -1}, 5} -> Placed[
+           Grid[{{" ", " ", " "}, {" "}, {" ", " "}}, Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {1, 3} -> True, {3, 1} -> True}}], 
+           Tooltip], {{3, -1, -1}, 5} -> Placed[
+           
+           Grid[{{" ", " ", " ", " "}, {" ", " "}, {" ", " "}}, 
+            Dividers -> {{2 -> {
+                 Thickness[Large]}}}, 
+            Frame -> {
+             None, None, {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+               True, {2, 1} -> True, {3, 1} -> True}}], Tooltip]}, 
+       VertexSize -> {0.2}, VertexStyle -> {
+         RGBColor[0.87, 0.94, 1]}}]]}, 
+    TagBox[GraphicsGroupBox[{
+       {Hue[0.6, 0.7, 0.5], Opacity[0.7], Arrowheads[Medium], 
+        ArrowBox[{{0., 5.}, {0., 4.}}, 0.1], 
+        ArrowBox[{{0., 4.}, {-1., 3.}}, 0.1], 
+        ArrowBox[{{0., 4.}, {0., 3.}}, 0.1], 
+        ArrowBox[{{-1., 3.}, {-2., 2.}}, 0.1], 
+        ArrowBox[{{-1., 3.}, {-1., 2.}}, 0.1], 
+        ArrowBox[{{0., 3.}, {-1., 2.}}, 0.1], 
+        ArrowBox[{{0., 3.}, {0., 2.}}, 0.1], 
+        ArrowBox[{{-2., 2.}, {-3., 1.}}, 0.1], 
+        ArrowBox[{{-2., 2.}, {-2., 1.}}, 0.1], 
+        ArrowBox[{{-1., 2.}, {-1., 1.}}, 0.1], 
+        ArrowBox[{{-1., 2.}, {-2., 1.}}, 0.1], 
+        ArrowBox[{{-1., 2.}, {0., 1.}}, 0.1], 
+        ArrowBox[{{0., 2.}, {0., 1.}}, 0.1], 
+        ArrowBox[{{-3., 1.}, {-4., 0.}}, 0.1], 
+        ArrowBox[{{-3., 1.}, {-3., 0.}}, 0.1], 
+        ArrowBox[{{-3., 1.}, {-2., 0.}}, 0.1], 
+        ArrowBox[{{-1., 1.}, {-1., 0.}}, 0.1], 
+        ArrowBox[{{-1., 1.}, {-2., 0.}}, 0.1], 
+        ArrowBox[{{-1., 1.}, {1., 0.}}, 0.1], 
+        ArrowBox[{{-2., 1.}, {-2., 0.}}, 0.1], 
+        ArrowBox[{{-2., 1.}, {0., 0.}}, 0.1], 
+        ArrowBox[{{0., 1.}, {1., 0.}}, 0.1], 
+        ArrowBox[{{0., 1.}, {0., 0.}}, 0.1]}, 
+       {RGBColor[0.87, 0.94, 1], EdgeForm[{GrayLevel[0], Opacity[0.7]}], 
+        TagBox[
+         TooltipBox[DiskBox[{0., 5.}, 0.1],
+          "\[EmptySet]"],
+         Annotation[#, $CellContext`\[EmptySet], "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{0., 4.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \""}, {""}, {""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" "}, {}, {}}, Dividers -> {{1 -> {
+                Thickness[Large]}}}, Frame -> {None, None, {{1, 1} -> True}}],
+           "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-1., 3.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \""}, {"", ""}, {"", ""}}, AutoDelete -> 
+            False, GridBoxDividers -> {"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {1, 2} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" ", " "}, {}, {}}, Dividers -> {{1 -> {
+                Thickness[Large]}}}, 
+           Frame -> {None, None, {{1, 1} -> True, {1, 2} -> True}}], 
+          "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{0., 3.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \""}, {"\" \""}, {""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {2, 1} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" "}, {" "}, {}}, Dividers -> {{1 -> {
+                Thickness[Large]}}}, 
+           Frame -> {None, None, {{1, 1} -> True, {2, 1} -> True}}], 
+          "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-2., 2.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \"", "\" \""}, {"", "", ""}, {"", "", ""}}, 
+            AutoDelete -> False, GridBoxDividers -> {"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {1, 2} -> True, {1, 3} -> 
+                True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" ", " ", " "}, {}, {}}, Dividers -> {{1 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 1} -> True, {1, 2} -> True, {1, 3} -> True}}], 
+          "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-1., 2.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \""}, {"\" \"", ""}, {"", ""}}, AutoDelete -> 
+            False, GridBoxDividers -> {"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {1, 2} -> True, {2, 1} -> 
+                True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" ", " "}, {" "}, {}}, Dividers -> {{1 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 1} -> True, {1, 2} -> True, {2, 1} -> True}}], 
+          "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{0., 2.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \""}, {"\" \""}, {"\" \""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {2, 1} -> True, {3, 1} -> 
+                True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" "}, {" "}, {" "}}, Dividers -> {{1 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 1} -> True, {2, 1} -> True, {3, 1} -> True}}], 
+          "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-3., 1.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \"", "\" \"", "\" \""}, {
+             "\" \"", "", "", ""}, {"\" \"", "\" \"", "", ""}}, AutoDelete -> 
+            False, GridBoxDividers -> {"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+                True, {3, 1} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          
+          Grid[{{" ", " ", " ", " "}, {" "}, {" ", " "}}, 
+           Dividers -> {{2 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+              True, {3, 1} -> True}}], "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-1., 1.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \"", "\" \""}, {"\" \"", "\" \"", ""}, {
+             "\" \"", "\" \"", ""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {1, 3} -> True, {2, 2} -> 
+                True, {3, 1} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          
+          Grid[{{" ", " ", " "}, {" ", " "}, {" ", " "}}, 
+           Dividers -> {{2 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 2} -> True, {1, 3} -> True, {2, 2} -> 
+              True, {3, 1} -> True}}], "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-2., 1.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \""}, {"", ""}, {"", ""}}, AutoDelete -> 
+            False, GridBoxDividers -> {"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {1, 2} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" ", " "}, {}, {}}, Dividers -> {{1 -> {
+                Thickness[Large]}}}, 
+           Frame -> {None, None, {{1, 1} -> True, {1, 2} -> True}}], 
+          "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{0., 1.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \""}, {"\" \""}, {""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True, {2, 1} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" "}, {" "}, {}}, Dividers -> {{1 -> {
+                Thickness[Large]}}}, 
+           Frame -> {None, None, {{1, 1} -> True, {2, 1} -> True}}], 
+          "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-4., 0.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \"", "\" \"", "\" \"", "\" \""}, {
+             "\" \"", "\" \"", "", "", ""}, {
+             "\" \"", "\" \"", "\" \"", "\" \"", ""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {3 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 3} -> True, {1, 4} -> True, {1, 5} -> 
+                True, {3, 1} -> True, {3, 2} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          
+          Grid[{{" ", " ", " ", " ", " "}, {" ", " "}, {" ", " ", " ", " "}}, 
+           Dividers -> {{3 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 3} -> True, {1, 4} -> True, {1, 5} -> 
+              True, {3, 1} -> True, {3, 2} -> True}}], "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-3., 0.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \"", "\" \"", "\" \""}, {
+             "\" \"", "\" \"", "", ""}, {"\" \"", "\" \"", "", ""}}, 
+            AutoDelete -> False, GridBoxDividers -> {"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+                True, {2, 1} -> True, {3, 1} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          
+          Grid[{{" ", " ", " ", " "}, {" ", " "}, {" ", " "}}, 
+           Dividers -> {{2 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 2} -> True, {1, 3} -> True, {1, 4} -> 
+              True, {2, 1} -> True, {3, 1} -> True}}], "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-1., 0.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \"", "\" \"", "\" \""}, {
+             "\" \"", "\" \"", "\" \"", ""}, {
+             "\" \"", "\" \"", "\" \"", "\" \""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {3 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 3} -> True, {1, 4} -> True, {2, 3} -> 
+                True, {3, 1} -> True, {3, 2} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          
+          Grid[{{" ", " ", " ", " "}, {" ", " ", " "}, {" ", " ", " ", " "}}, 
+           Dividers -> {{3 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 3} -> True, {1, 4} -> True, {2, 3} -> 
+              True, {3, 1} -> True, {3, 2} -> True}}], "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{-2., 0.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \"", "\" \""}, {"\" \"", "", ""}, {
+             "\" \"", "\" \"", ""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {1, 3} -> True, {3, 1} -> 
+                True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" ", " ", " "}, {" "}, {" ", " "}}, Dividers -> {{2 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 2} -> True, {1, 3} -> True, {3, 1} -> True}}], 
+          "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{1., 0.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \"", "\" \""}, {"\" \"", "\" \""}, {
+             "\" \"", "\" \""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {2 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 2} -> True, {2, 2} -> True, {3, 1} -> 
+                True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" ", " "}, {" ", " "}, {" ", " "}}, Dividers -> {{2 -> {
+                Thickness[Large]}}}, 
+           Frame -> {
+            None, None, {{1, 2} -> True, {2, 2} -> True, {3, 1} -> True}}], 
+          "Tooltip"]& ], 
+        TagBox[
+         TooltipBox[DiskBox[{0., 0.}, 0.1],
+          TagBox[
+           
+           GridBox[{{"\" \""}, {""}, {""}}, AutoDelete -> False, 
+            GridBoxDividers -> {"ColumnsIndexed" -> {1 -> {
+                  Thickness[Large]}}}, 
+            GridBoxFrame -> {
+             "Columns" -> None, "Rows" -> None, 
+              "ItemsIndexed" -> {{1, 1} -> True}}, 
+            GridBoxItemSize -> {
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], "Grid"]],
+         Annotation[#, 
+          Grid[{{" "}, {}, {}}, Dividers -> {{1 -> {
+                Thickness[Large]}}}, Frame -> {None, None, {{1, 1} -> True}}],
+           "Tooltip"]& ]}}],
+     MouseAppearanceTag["NetworkGraphics"]],
+    AllowKernelInitialization->False]],
+  DefaultBaseStyle->"NetworkGraphics",
+  FormatType->TraditionalForm,
+  FrameTicks->None,
+  ImageSize->{371.57781982421875`, 373.}]], "Output",
+ CellChangeTimes->{3.9409172709671707`*^9},
+ CellLabel->"Out[11]=",ExpressionUUID->"62934259-f103-4190-a976-9ec37e137a0a"]
+}, Open  ]]
+},
+WindowSize->{1390, 847},
+WindowMargins->{{4, Automatic}, {Automatic, 4}},
+FrontEndVersion->"14.0 for Mac OS X x86 (64-bit) (December 12, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"a49b2d6b-d69b-4164-85e6-02932ffb51c1"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 372, 8, 46, "Input",ExpressionUUID->"65415d81-acf7-4526-92b7-9abdffff34a5",
+ InitializationCell->True],
+Cell[933, 30, 631, 12, 30, "Input",ExpressionUUID->"62497f09-1ebf-4cd3-9e8b-6077f6c53575"],
+Cell[CellGroupData[{
+Cell[1589, 46, 257, 4, 30, "Input",ExpressionUUID->"866535f1-e6a5-40bc-8c4c-6dbb82688e5a"],
+Cell[1849, 52, 19740, 471, 492, "Output",ExpressionUUID->"4dcf49ef-fdff-419e-bc80-502b1ad0dc3d"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[21626, 528, 423, 10, 52, "Input",ExpressionUUID->"e39fbc3e-b6bf-4d9e-a4f4-2b889cab1930"],
+Cell[22052, 540, 20415, 448, 390, "Output",ExpressionUUID->"62934259-f103-4190-a976-9ec37e137a0a"]
+}, Open  ]]
+}
+]
+*)
+
