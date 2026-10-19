@@ -1,140 +1,267 @@
 (* ::Package:: *)
 
-(*Primitives for constructing the Bratteli diagram of the Walled Brauer Algebra*)
-BratteliLevels[p_,q_,d_]:=BratteliLevels[p,q,d]=Table[{x,{},i},{i,0,p},{x,IntegerPartitions[i,d]}]~Join~Table[Flatten[Table[{x,y,p+i},{k,0,Min[p,i]},{x,IntegerPartitions[p-k,d]},{y,IntegerPartitions[i-k,d-Length@x]}],2],{i,1,q}]
+(* ::Title:: *)
+(*Gelfand-Tsetlin basis of the walled Brauer algebra (v1)*)
 
-Contains[x_,y_]:=Module[{d,xn,yn},
-	d=Max[Length[x],Length[y]];
-	{xn,yn}={PadRight[x,d],PadRight[y,d]};
-	AllTrue[{xn,yn}\[Transpose],#[[1]]>=#[[2]]&]
-]
 
-OrderWBA[x_,y_]:=
-If[x[[3]]+1==y[[3]],
-	If[(Total[x[[1]]]==x[[3]])&&(Total[y[[1]]]==y[[3]]),
-		Contains[y[[1]],x[[1]]],
-		If[(Total[x[[1]]]<=x[[3]])&&(Total[y[[1]]]<y[[3]]),
-			If[Total[y[[1]]]==Total[x[[1]]],
-				Contains[y[[2]],x[[2]]]&&Contains[x[[1]],y[[1]]],
-					If[Total[y[[2]]]==Total[x[[2]]],
-						Contains[x[[2]],y[[2]]]&&Contains[x[[1]],y[[1]]],
-					False],
-			False]
+(* ::Text:: *)
+(*Supporting code for arXiv:2310.02252v1. The walled Brauer algebra (algebra of partially transposed permutations)*)
+(*acts on p copies of C^d and q copies of its dual. Its irreps are labelled by pairs {left, right} of partitions, and the*)
+(*vertices of its Bratteli diagram are triples {left, right, level}. Gelfand-Tsetlin basis vectors are paths in the*)
+(*Bratteli diagram or, equivalently, pairs of mixed Young tableaux.*)
+(**)
+(*All definitions live in the Global` context, so that the notebooks in this folder can use and extend them.*)
+
+
+(* ::Section:: *)
+(*Bratteli diagram, irreps and paths*)
+
+
+(* Levels 0, ..., p hold the partitions {left, {}} of the level; level p + i holds the pairs {left, right} with
+   left a partition of p - k, right a partition of i - k, k = 0, ..., Min[p, i], and at most d rows in total *)
+BratteliLevels[p_, q_, d_] := BratteliLevels[p, q, d] = Join[
+	Table[{left, {}, i}, {i, 0, p}, {left, IntegerPartitions[i, d]}],
+	Table[
+		Flatten[
+			Table[
+				{left, right, p + i},
+				{k, 0, Min[p, i]}, {left, IntegerPartitions[p - k, d]}, {right, IntegerPartitions[i - k, d - Length@left]}
+			],
+			2
 		],
-	False],
-False]
-
-BratteliDiagram[p_,q_,d_]:=BratteliDiagram[p,q,d]=RelationGraph[OrderWBA,Flatten[BratteliLevels[p,q,d],1],GraphLayout->"LayeredDigraphEmbedding"]
-
-(*List all Irreps, Paths and Irrep dimensions*)
-Irreps[p_,q_,d_]:=Irreps[p,q,d]=BratteliLevels[p,q,d][[-1,All,1;;2]]
-AllPaths[p_,q_,d_]:=AllPaths[p,q,d]=(#[[All,1;;2]]&/@FindPath[BratteliDiagram[p,q,d],{{},{},0},{#[[1]],#[[2]],p+q},{p+q},All])&/@Irreps[p,q,d]
-IrrepDims[p_,q_,d_]:=IrrepDims[p,q,d]=Length/@AllPaths[p,q,d]
-
-
-(*Display Young Diagram (YD) nicely*)
-DisplayYoungDiagram[YD_]:=DisplayYoungDiagram[YD]=If[YD=={},ToString@\[EmptySet],Grid[Table[Table[" ",{i,rowLength}],{rowLength,YD}],Frame->Join[{None},{None},{Flatten[With[{cc=Range@#&/@YD},Table[Flatten[{nn,#}->True&/@cc[[nn]],1],{nn,Length@cc}]],1]}]]]
-
-(*Functions for conversion between path and mixed Young Tableaux*)
-YoungTableauxFromYDPathLeft[L_,p_]:=Module[{YTL,index,i},
-YTL=Table[Table[Null,{j,i}],{i,L[[p]]}];
-For[i=1,i<Length@L,i++,
-If[L[[i+1]]==L[[i]],Nothing,index=Position[Abs/@(L[[i]]-L[[i+1]]),1][[1,1]]];
-If[i<p,YTL[[index,L[[i,index]]+1]]={i},If[L[[i+1]]==L[[i]],Nothing,
-YTL[[index,L[[i,index]]]]=YTL[[index,L[[i,index]]]]~Join~{i}]]
-];YTL
+		{i, 1, q}
+	]
 ]
 
-YoungTableauxFromYDPathRight[R_,p_]:=Module[{YTR,index,i},
-YTR=Table[Table[Null,{j,i}],{i,R[[-1]]}];
-For[i=p,i<Length@R,i++,
-If[R[[i+1]]==R[[i]],Nothing,index=Position[R[[i+1]]-R[[i]],1][[1,1]]];
-If[R[[i+1]]==R[[i]],Nothing,
-YTR[[index,R[[i,index]]+1]]={i}]
-];YTR
+(* True if the Young diagram x contains the Young diagram y *)
+Contains[x_, y_] := With[{rows = Max[Length@x, Length@y]},
+	AllTrue[PadRight[x, rows] - PadRight[y, rows], NonNegative]
 ]
 
-(*From a path to a mixed Young Tableaux*)
-PathToYoungTableauxPair[path_]:=Module[{p,L,R,YTL,index},
-p=FirstPosition[Table[Total@path[[i+1,1]]-Total@path[[i,1]],{i, Length[path]-1}],x_/;x<=0,{Length@path}][[1]];
-L=PadRight[#,Length@path[[p,1]]]&/@path[[All,1]];
-R=PadRight[#,Length@path[[-1,2]]]&/@path[[All,2]];
-{YoungTableauxFromYDPathLeft[L,p],YoungTableauxFromYDPathRight[R,p]}]
-
-TransformAllPathToYT[paths_]:=(PathToYoungTableauxPair[#]&/@#)&/@paths
-
-(*Display mixed Young tableaux*)
-DisplayYoungTableaux[YT_]:=If[YT=={},ToString@\[EmptySet],Grid[((StringJoin[ToString/@Riffle[#,","]]&/@#)&/@YT),Frame->Join[{None},{None},{Flatten[With[{cc=Range@#&/@(Length/@YT)},Table[Flatten[{nn,#}->True&/@cc[[nn]],1],{nn,Length@cc}]],1]}]]]
-DisplayYoungTableauxPair[YTpair_]:={DisplayYoungTableaux[YTpair[[1]]],DisplayYoungTableaux[YTpair[[2]]]}
-
-(*Display paths as mixed Young Tableaux*)
-DisplayPathAsYT[path_]:=DisplayYoungTableauxPair[PathToYoungTableauxPair[path]]
-DisplayAllPathsAsYT[paths_]:=(DisplayYoungTableauxPair[PathToYoungTableauxPair[#]]&/@#)&/@paths
-
-
-(*Helper functions for Young Diagrams*)
-AddCellPositions[YD_]:=Module[{padYD},
-padYD=PadRight[YD,Length@YD+1];
-Table[If[i==1,{1,padYD[[1]]+1},If[padYD[[i]]<padYD[[i-1]],{i,padYD[[i]]+1},Nothing]],{i,Length@padYD}]
+(* Edge from vertex x to vertex y: y is one level higher, and
+   - in the left part of the diagram, y adds a cell to the left partition of x;
+   - in the right part, y adds a cell to the right partition of x, or removes a cell from its left partition *)
+OrderWBA[{left1_, right1_, level1_}, {left2_, right2_, level2_}] := Which[
+	level2 != level1 + 1, False,
+	Total@left1 == level1 && Total@left2 == level2, Contains[left2, left1],
+	Total@left1 <= level1 && Total@left2 < level2, Which[
+		Total@left2 == Total@left1, Contains[right2, right1] && Contains[left1, left2],
+		Total@right2 == Total@right1, Contains[right1, right2] && Contains[left1, left2],
+		True, False
+	],
+	True, False
 ]
 
-RemoveCellPositions[YD_]:=Module[{padYD},
-Table[If[i==Length@YD,{i,YD[[i]]},If[YD[[i]]>YD[[i+1]],{i,YD[[i]]},Nothing]],{i,Length@YD}]
+BratteliDiagram[p_, q_, d_] := BratteliDiagram[p, q, d] =
+	RelationGraph[OrderWBA, Flatten[BratteliLevels[p, q, d], 1], GraphLayout -> "LayeredDigraphEmbedding"]
+
+(* Irreps {left, right} and, for every irrep, its paths from the root, each vertex given as {left, right} *)
+Irreps[p_, q_, d_] := Irreps[p, q, d] = BratteliLevels[p, q, d][[-1, All, 1 ;; 2]]
+
+AllPaths[p_, q_, d_] := AllPaths[p, q, d] = Table[
+	#[[All, 1 ;; 2]] & /@ FindPath[BratteliDiagram[p, q, d], {{}, {}, 0}, Append[irrep, p + q], {p + q}, All],
+	{irrep, Irreps[p, q, d]}
 ]
 
-(*Standard Hook (Manhattan) distance and Content*)
-Content[cell_]:=cell[[2]]-cell[[1]]
-HookDistance[cell1_,cell2_]:=Content[cell1]-Content[cell2]
-
-(*Walled coordinate and distance of a cell*)
-wCoord[coord_,d_]:=If[coord[[1]]==1,coord[[2;;3]],{d-coord[[2]]+1,1-coord[[3]]}]
-
-(*Conjugate partition*)
-ConjugatePartition[\[Lambda]_]:=Table[Count[\[Lambda]-i+1,u_/;u>0],{i,\[Lambda][[1]]}]
-
-(*Dimension of unitary group irrep*)
-m[\[Lambda]_,d_]:=Times@@Flatten@Table[(d+j-i)/(\[Lambda][[i]]-j+ConjugatePartition[\[Lambda]][[j]]-i+1),{i,1,Length@\[Lambda]},{j,1,\[Lambda][[i]]}]
+IrrepDims[p_, q_, d_] := IrrepDims[p, q, d] = Length /@ AllPaths[p, q, d]
 
 
-(*Young-Yamanouchi basis functions*)
+(* ::Section:: *)
+(*Young diagrams and mixed Young tableaux*)
 
-Act[i_,YT_,p_,q_,d_]:=Module[{tmpYT,coord1,coord2,mobElemFixed,LambdaYT,LambdaYD,vec,out},
-tmpYT=YT;
-If[i==p,If[Position[YT,{p,p+1}]=={},{YT->0},
-mobElemFixed=Position[YT,{p,p+1}][[1,2;;-1]];
-LambdaYT=Select[Delete[YT[[1]],mobElemFixed],UnsameQ[#,{}]&];
-LambdaYD=Length/@(LambdaYT);
-vec=Table[\[Sqrt]((d+Content[mobileElem])(Product[HookDistance[mobileElem,corner],{corner,RemoveCellPositions[LambdaYD]}]/Product[HookDistance[mobileElem,mobileElem2],{mobileElem2,DeleteCases[AddCellPositions[LambdaYD],mobileElem]}])),{mobileElem,AddCellPositions[LambdaYD]}];
-out=Table[{If[mobileElem[[1]]==Length[LambdaYD]+1,Insert[PadRight[LambdaYT,Length[LambdaYD]+1,{{}}],{p,p+1},mobileElem],Insert[LambdaYT,{p,p+1},mobileElem]],YT[[2]]}->vec[[Position[AddCellPositions[LambdaYD],mobElemFixed][[1,1]]]]*vec[[Position[AddCellPositions[LambdaYD],mobileElem][[1,1]]]],{mobileElem,AddCellPositions[LambdaYD]}];
-out]
-,
-coord1=Position[tmpYT,i][[1,1;;-2]];
-coord2=Position[tmpYT,i+1][[1,1;;-2]];
-tmpYT=ReplacePart[tmpYT,coord1->ReplacePart[tmpYT[[Sequence@@coord1]],If[(i>=p)&&(Length[tmpYT[[Sequence@@coord1]]]==2),2,1]->i+1]];
-tmpYT=ReplacePart[tmpYT,coord2->ReplacePart[tmpYT[[Sequence@@coord2]],If[(i>=p)&&(Length[tmpYT[[Sequence@@coord2]]]==2),2,1]->i]];
-{YT->1/(Sign[p-i]HookDistance[wCoord[coord2,d],wCoord[coord1,d]]),tmpYT->Sqrt[1-1/HookDistance[wCoord[coord1,d],wCoord[coord2,d]]^2]}
-]
+
+DisplayYoungDiagram[YD_] := DisplayYoungDiagram[YD] = If[YD == {},
+	ToString@\[EmptySet],
+	Grid[
+		Table[" ", {i, Length@YD}, {j, YD[[i]]}],
+		Frame -> {None, None, Flatten[Table[{i, j} -> True, {i, Length@YD}, {j, YD[[i]]}], 1]}
+	]
 ]
 
-(*Check Walled Brauer Algebra realtions for the list of representation matrices \[Sigma]*)
-CheckRelations[\[Sigma]_,p_,q_,d_]:=Module[{n,transpList,contrList},
-n=Length@\[Sigma];
-contrList=Complement[Range[p+q-1],{p-1,p,p+1}];
-transpList=Complement[Range[p+q-1],{p}];
-{
-(*Relations involving only Coxeter generators*)
-Table[If[i==p,Nothing,\[Sigma][[i]] . \[Sigma][[i]]==IdentityMatrix[Length@\[Sigma][[i]]]],{i,n}],
-Table[If[(i<=p-2)||(i>=p+1),\[Sigma][[i]] . \[Sigma][[i+1]] . \[Sigma][[i]]==\[Sigma][[i+1]] . \[Sigma][[i]] . \[Sigma][[i+1]],Nothing],{i,n-1}],
-Flatten@Table[If[Abs[i-j]>1,\[Sigma][[j]] . \[Sigma][[i]]==\[Sigma][[i]] . \[Sigma][[j]],Nothing],{i, transpList},{j,transpList}],
-(*Relations involving the contraction generator*)
-{If[n>=p>=1,\[Sigma][[p]] . \[Sigma][[p]]==d*\[Sigma][[p]],Nothing]};
-{If[n>=p>=2,\[Sigma][[p]] . \[Sigma][[p-1]] . \[Sigma][[p]]==\[Sigma][[p]],Nothing],If[(q>=2)&&(p>=1),\[Sigma][[p]] . \[Sigma][[p+1]] . \[Sigma][[p]]==\[Sigma][[p]],Nothing]},
-Table[If[n>=p>=1,\[Sigma][[p]] . \[Sigma][[i]]==\[Sigma][[i]] . \[Sigma][[p]],Nothing],{i,contrList}],
-Flatten@{If[Min[p,q]>=2,{\[Sigma][[p]] . \[Sigma][[p+1]] . \[Sigma][[p-1]] . \[Sigma][[p]] . \[Sigma][[p-1]]==\[Sigma][[p]] . \[Sigma][[p+1]] . \[Sigma][[p-1]] . \[Sigma][[p]] . \[Sigma][[p+1]],\[Sigma][[p-1]] . \[Sigma][[p]] . \[Sigma][[p+1]] . \[Sigma][[p-1]] . \[Sigma][[p]]==\[Sigma][[p+1]] . \[Sigma][[p]] . \[Sigma][[p+1]] . \[Sigma][[p-1]] . \[Sigma][[p]]},Nothing]}
-}
+(* Left tableau of a path. L lists the left partitions along the path (root included, all padded to the same length)
+   and L[[p]] is the left partition at the wall. Step i < p adds the cell labelled {i}; a later step i that removes
+   a cell (a contraction) appends i to the label of that cell. *)
+YoungTableauxFromYDPathLeft[L_, p_] := Module[{tableau, row},
+	tableau = Table[Null, {i, Length@L[[p]]}, {j, L[[p, i]]}];
+	Do[
+		If[L[[i + 1]] =!= L[[i]],
+			row = First@FirstPosition[Abs[L[[i]] - L[[i + 1]]], 1];
+			If[i < p,
+				tableau[[row, L[[i, row]] + 1]] = {i},
+				tableau[[row, L[[i, row]]]] = Append[tableau[[row, L[[i, row]]]], i]
+			]
+		],
+		{i, Length@L - 1}
+	];
+	tableau
 ]
 
-(*Generate all irrep matrices for j-th generator*)
-GeneneratorGT[j_,p_,q_,d_,paths_]:=Table[SparseArray[Flatten@Table[(If[#[[2]]=!=0,{Position[block,#[[1]]][[1,1]],pathIndex}->#[[2]],If[Position[block,#[[1]]]==={},Nothing,{pathIndex,pathIndex}->0]])&/@Act[j,block[[pathIndex]],p,q,d],{pathIndex,Length@block}]],{block,TransformAllPathToYT[paths]}]
-AllGeneratorsGT[p_,q_,d_,paths_]:=Table[GeneneratorGT[j,p,q,d,paths],{j,1,p+q-1}];
-AllGeneratorsGT[p_,q_,d_]:=Table[GeneneratorGT[j,p,q,d,AllPaths[p,q,d]],{j,1,p+q-1}];
+(* Right tableau of a path: R lists the right partitions along the path; step i >= p that adds a cell labels it {i} *)
+YoungTableauxFromYDPathRight[R_, p_] := Module[{tableau, row},
+	tableau = Table[Null, {i, Length@Last@R}, {j, Last[R][[i]]}];
+	Do[
+		If[R[[i + 1]] =!= R[[i]],
+			row = First@FirstPosition[R[[i + 1]] - R[[i]], 1];
+			tableau[[row, R[[i, row]] + 1]] = {i}
+		],
+		{i, p, Length@R - 1}
+	];
+	tableau
+]
+
+(* From a path (list of vertices {left, right}, root included) to a pair of mixed Young tableaux *)
+PathToYoungTableauxPair[path_] := Module[{p, L, R},
+	(* path[[p]] is the vertex at the wall: after it the left partition stops growing *)
+	p = First@FirstPosition[Differences[Total /@ path[[All, 1]]], growth_ /; growth <= 0, {Length@path}];
+	L = PadRight[#, Length@path[[p, 1]]] & /@ path[[All, 1]];
+	R = PadRight[#, Length@path[[-1, 2]]] & /@ path[[All, 2]];
+	{YoungTableauxFromYDPathLeft[L, p], YoungTableauxFromYDPathRight[R, p]}
+]
+
+TransformAllPathToYT[paths_] := Map[PathToYoungTableauxPair, paths, {2}]
+
+DisplayYoungTableaux[YT_] := If[YT == {},
+	ToString@\[EmptySet],
+	Grid[
+		Map[StringRiffle[ToString /@ #, ","] &, YT, {2}],
+		Frame -> {None, None, Flatten[Table[{i, j} -> True, {i, Length@YT}, {j, Length@YT[[i]]}], 1]}
+	]
+]
+
+DisplayYoungTableauxPair[YTpair_] := DisplayYoungTableaux /@ YTpair
+
+DisplayPathAsYT[path_] := DisplayYoungTableauxPair@PathToYoungTableauxPair@path
+
+DisplayAllPathsAsYT[paths_] := Map[DisplayPathAsYT, paths, {2}]
+
+
+(* ::Section:: *)
+(*Helper functions for Young diagrams*)
+
+
+(* Positions {row, column} of the cells that can be added to the Young diagram YD, including a new row *)
+AddCellPositions[YD_] := With[{rows = Append[YD, 0]},
+	Table[If[i == 1 || rows[[i]] < rows[[i - 1]], {i, rows[[i]] + 1}, Nothing], {i, Length@rows}]
+]
+
+(* Positions {row, column} of the cells that can be removed from the Young diagram YD *)
+RemoveCellPositions[YD_] :=
+	Table[If[i == Length@YD || YD[[i]] > YD[[i + 1]], {i, YD[[i]]}, Nothing], {i, Length@YD}]
+
+(* Content of a cell and the axial (Manhattan) distance between two cells *)
+Content[cell_] := cell[[2]] - cell[[1]]
+HookDistance[cell1_, cell2_] := Content[cell1] - Content[cell2]
+
+(* Walled coordinates {row, column} of a cell given as {tableau, row, column}: cells of the right tableau
+   are reflected through the wall *)
+wCoord[coord_, d_] := If[coord[[1]] == 1, coord[[2 ;; 3]], {d - coord[[2]] + 1, 1 - coord[[3]]}]
+
+ConjugatePartition[\[Lambda]_] := Table[Count[\[Lambda], row_ /; row >= i], {i, First@\[Lambda]}]
+
+(* Dimension of the irrep \[Lambda] of the unitary group U(d), by the hook-content formula *)
+m[\[Lambda]_, d_] := Product[
+	(d + j - i) / (\[Lambda][[i]] - j + ConjugatePartition[\[Lambda]][[j]] - i + 1),
+	{i, Length@\[Lambda]}, {j, \[Lambda][[i]]}
+]
+
+
+(* ::Section:: *)
+(*Generators in the Gelfand-Tsetlin (Young-Yamanouchi) basis*)
+
+
+(* Action of the generator \[Sigma]_i on the basis vector labelled by the pair of mixed Young tableaux YT, as a list of
+   rules  tableau -> coefficient. \[Sigma]_p is the contraction, all other generators are transpositions. *)
+Act[i_, YT_, p_, q_, d_] := If[i == p, ActContraction[YT, p, d], ActTransposition[i, YT, p, d]]
+
+(* The contraction is non-zero only if the cell labelled {p, p + 1} exists. It then removes this cell from the left
+   tableau and puts it back at every addable position. *)
+ActContraction[YT_, p_, d_] := Module[{cell, left, shape, addable, weight},
+	cell = FirstPosition[YT, {p, p + 1}];
+	If[MissingQ@cell,
+		{YT -> 0},
+		cell = Rest@cell;
+		left = DeleteCases[Delete[First@YT, cell], {}];
+		shape = Length /@ left;
+		addable = AddCellPositions@shape;
+		weight[c_] := Sqrt[
+			(d + Content@c) Product[HookDistance[c, corner], {corner, RemoveCellPositions@shape}] /
+			Product[HookDistance[c, other], {other, DeleteCases[addable, c]}]
+		];
+		Table[
+			{Insert[If[First@c > Length@left, Append[left, {}], left], {p, p + 1}, c], Last@YT} -> weight[cell] weight[c],
+			{c, addable}
+		]
+	]
+]
+
+(* Young's orthogonal form: the transposition (i, i + 1) maps YT to itself and to YT with the labels i and i + 1
+   swapped, with coefficients given by the axial distance between the two cells in walled coordinates *)
+ActTransposition[i_, YT_, p_, d_] := Module[{label1, label2, cell1, cell2},
+	label1 = First@Position[YT, i];
+	label2 = First@Position[YT, i + 1];
+	cell1 = Most@label1;
+	cell2 = Most@label2;
+	{
+		YT -> 1 / (Sign[p - i] HookDistance[wCoord[cell2, d], wCoord[cell1, d]]),
+		ReplacePart[YT, {label1 -> i + 1, label2 -> i}] -> Sqrt[1 - 1 / HookDistance[wCoord[cell1, d], wCoord[cell2, d]]^2]
+	}
+]
+
+(* Matrices of the generator \[Sigma]_j, one per irrep, in the Gelfand-Tsetlin basis given by paths *)
+GeneratorGT[j_, p_, q_, d_, paths_] := Table[
+	With[{dim = Length@block},
+		SparseArray[
+			Flatten@Table[
+				If[#[[2]] === 0, Nothing, {Position[block, #[[1]]][[1, 1]], column} -> #[[2]]] & /@
+					Act[j, block[[column]], p, q, d],
+				{column, dim}
+			],
+			{dim, dim}
+		]
+	],
+	{block, TransformAllPathToYT[paths]}
+]
+
+GeneneratorGT = GeneratorGT; (* deprecated name *)
+
+AllGeneratorsGT[p_, q_, d_, paths_] := Table[GeneratorGT[j, p, q, d, paths], {j, 1, p + q - 1}]
+AllGeneratorsGT[p_, q_, d_] := AllGeneratorsGT[p, q, d, AllPaths[p, q, d]]
+
+
+(* ::Section:: *)
+(*Relations of the walled Brauer algebra*)
+
+
+(* Check the defining relations for the list \[Sigma] of matrices of the generators \[Sigma]_1, ..., \[Sigma]_(p+q-1) *)
+CheckRelations[\[Sigma]_, p_, q_, d_] := Module[{n = Length@\[Sigma], transpositions, commuting},
+	transpositions = Complement[Range[p + q - 1], {p}];
+	commuting = Complement[Range[p + q - 1], {p - 1, p, p + 1}];
+	{
+		(* relations of the transpositions *)
+		Table[If[i == p, Nothing, \[Sigma][[i]] . \[Sigma][[i]] == IdentityMatrix[Length@\[Sigma][[i]]]], {i, n}],
+		Table[
+			If[i <= p - 2 || i >= p + 1, \[Sigma][[i]] . \[Sigma][[i + 1]] . \[Sigma][[i]] == \[Sigma][[i + 1]] . \[Sigma][[i]] . \[Sigma][[i + 1]], Nothing],
+			{i, n - 1}
+		],
+		Flatten@Table[
+			If[Abs[i - j] > 1, \[Sigma][[j]] . \[Sigma][[i]] == \[Sigma][[i]] . \[Sigma][[j]], Nothing],
+			{i, transpositions}, {j, transpositions}
+		],
+		(* relations involving the contraction \[Sigma]_p *)
+		{If[n >= p >= 1, \[Sigma][[p]] . \[Sigma][[p]] == d \[Sigma][[p]], Nothing]},
+		{
+			If[n >= p >= 2, \[Sigma][[p]] . \[Sigma][[p - 1]] . \[Sigma][[p]] == \[Sigma][[p]], Nothing],
+			If[q >= 2 && p >= 1, \[Sigma][[p]] . \[Sigma][[p + 1]] . \[Sigma][[p]] == \[Sigma][[p]], Nothing]
+		},
+		Table[If[n >= p >= 1, \[Sigma][[p]] . \[Sigma][[i]] == \[Sigma][[i]] . \[Sigma][[p]], Nothing], {i, commuting}],
+		If[Min[p, q] >= 2,
+			{
+				\[Sigma][[p]] . \[Sigma][[p + 1]] . \[Sigma][[p - 1]] . \[Sigma][[p]] . \[Sigma][[p - 1]] ==
+					\[Sigma][[p]] . \[Sigma][[p + 1]] . \[Sigma][[p - 1]] . \[Sigma][[p]] . \[Sigma][[p + 1]],
+				\[Sigma][[p - 1]] . \[Sigma][[p]] . \[Sigma][[p + 1]] . \[Sigma][[p - 1]] . \[Sigma][[p]] ==
+					\[Sigma][[p + 1]] . \[Sigma][[p]] . \[Sigma][[p + 1]] . \[Sigma][[p - 1]] . \[Sigma][[p]]
+			},
+			{}
+		]
+	}
+]
