@@ -43,6 +43,8 @@ Get["/path/to/walledbrauer-gtbasis/Mixed Schur Tools.wl"]
 Get[NotebookDirectory[] <> "/Mixed Schur Tools.wl"]
 ```
 
+Load the package before you evaluate any cell that uses its functions. The notebooks do this in their first cell, which is an initialization cell. If a cell that mentions, say, `CG` runs first, Mathematica creates an empty ``Global`CG``. After loading, it reports `CG::shdw`, and that empty symbol hides the package function. To recover, quit the kernel and evaluate the notebook again from the top.
+
 A short session for $n = 2$, $m = 1$, $d = 2$:
 
 ```mathematica
