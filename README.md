@@ -13,7 +13,7 @@ $$(\mathbb{C}^d)^{\otimes n} \otimes (\mathbb{C}^{d*})^{\otimes m}$$
 that is, $n$ copies of $\mathbb{C}^d$ and $m$ copies of its dual. Two commuting actions live on it, and the algebras they generate are each other's commutants:
 
 * The **unitary group** $U(d)$ acts as $U^{\otimes n} \otimes \bar{U}^{\otimes m}$.
-* The **algebra of partially transposed permutations** acts by permuting the first $n$ and the last $m$ tensor factors, and by the contraction between factors $n$ and $n+1$. This is the walled Brauer algebra $B_{n,m}(d)$, abbreviated WBA below. The contraction is the partial transpose of the swap of those two factors.
+* The **algebra of partially transposed permutations** acts by permuting the first $n$ and the last $m$ tensor factors, and by the contraction between factors $n$ and $n+1$. The contraction is the partial transpose of the swap of those two factors. This algebra is the image of the walled Brauer algebra $B_{n,m}(d)$ acting on the tensor space: it is isomorphic to $B_{n,m}(d)$ when $d \ge n + m$ and a proper quotient of it otherwise. As in the function names, we still call it the walled Brauer algebra (WBA) below. Its irreps are labelled by pairs of partitions $(\lambda, \mu)$ of $n - k$ and $m - k$, $k = 0, \dots, \min(n, m)$, with at most $d$ rows in total.
 
 The space therefore decomposes as $\bigoplus_\lambda V_\lambda \otimes W_\lambda$. Here $V_\lambda$ is an irrep of $U(d)$ and $W_\lambda$ is the matching irrep of the walled Brauer algebra. The code provides the following:
 
@@ -43,7 +43,9 @@ Get["/path/to/walledbrauer-gtbasis/Mixed Schur Tools.wl"]
 Get[NotebookDirectory[] <> "/Mixed Schur Tools.wl"]
 ```
 
-Load the package before you evaluate any cell that uses its functions. The notebooks do this in their first cell, which is an initialization cell. If a cell that mentions, say, `CG` runs first, Mathematica creates an empty ``Global`CG``. After loading, it reports `CG::shdw`, and that empty symbol hides the package function. To recover, quit the kernel and evaluate the notebook again from the top.
+Load the package before you evaluate any cell that uses its functions. The notebooks do this in their first cell, which is an initialization cell. If a cell that mentions, say, `CG` runs first, Mathematica creates an empty ``Global`CG`` and reports `CG::shdw` when the package loads. Definitions evaluated before loading, such as `PathTensor` in `Matrix Units.nb`, keep referring to that empty symbol. To recover, run ``Remove["Global`CG"]`` and evaluate those cells again, or quit the kernel and evaluate the notebook from the top.
+
+Do not load `Mixed Schur Tools.wl` and `v1/walled_brauer_gt_basis.wl` in the same kernel. Both define `Irreps` and `OrderWBA`, with different conventions: v1 uses pairs of partitions, the package uses staircases. Whichever file is loaded second breaks the other one's functions without any error message. Notebooks share one kernel by default, so quit the kernel (Evaluation > Quit Kernel) before switching between a v1 notebook and a top-level notebook.
 
 A short session for $n = 2$, $m = 1$, $d = 2$:
 
@@ -144,7 +146,7 @@ The [`v1`](v1) folder holds the code for [arXiv:2310.02252v1](https://arxiv.org/
 
 | File | Description |
 | --- | --- |
-| [`walled_brauer_gt_basis.wl`](v1/walled_brauer_gt_basis.wl) | `BratteliDiagram`, `Irreps`, `AllPaths`, `IrrepDims`, `DisplayAllPathsAsYT` (paths as mixed Young tableaux), `AllGeneratorsGT` (generators in the Young–Yamanouchi basis) and `CheckRelations` (checks the walled Brauer algebra relations). Its definitions live in the ``Global` `` context, so the notebooks can extend them. |
+| [`walled_brauer_gt_basis.wl`](v1/walled_brauer_gt_basis.wl) | `BratteliDiagram`, `Irreps`, `AllPaths`, `IrrepDims`, `DisplayAllPathsAsYT` (paths as mixed Young tableaux), `AllGeneratorsGT` (generators in the Young–Yamanouchi basis) and `CheckRelations` (checks the walled Brauer algebra relations). Its definitions live in the ``Global` `` context, so the notebooks can extend them. Do not load it in a kernel that already has the main package (see [Getting started](#getting-started)). |
 | [`wba_gt_basis_demonstration.nb`](v1/wba_gt_basis_demonstration.nb) | Demonstrates the Bratteli diagram, the irreps, the mixed Young tableaux and the generator matrices, and checks the relations. |
 | [`port-based teleportation.nb`](v1/port-based%20teleportation.nb) | Applies the code to port-based teleportation. It builds the pretty good measurement and a Naimark-dilated projective measurement in the Gelfand–Tsetlin basis. |
 

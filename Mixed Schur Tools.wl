@@ -82,10 +82,10 @@ AssociationGTPatterns::usage = "AssociationGTPatterns[\[Lambda]] maps every Gelf
 (*Clebsch-Gordan coefficients*)
 
 
-RWcoef::usage = "RWcoef[P, w, Q] gives the reduced Wigner coefficient for two consecutive rows P and Q of Gelfand-Tsetlin patterns, where w are the same two rows of the pattern of a basis vector of C^d or of its dual.";
+RWcoef::usage = "RWcoef[{P_k, P_(k+1)}, {w_k, w_(k+1)}, {Q_k, Q_(k+1)}] gives the reduced Wigner coefficient for rows k and k + 1 of three Gelfand-Tsetlin patterns: P of \[Mu], w of a basis vector of C^d or of its dual, and Q of \[Lambda]. CGcoef[P, x, Q] is a product of such factors.";
 CGcoef::usage = "CGcoef[P, x, Q] gives the Clebsch-Gordan coefficient <Q|(|P> \[CircleTimes] |x>) for Gelfand-Tsetlin patterns P and Q. Here |x> is the basis vector e_x of C^d if x > 0, and the basis vector e_(-x) of the dual space C^d* if x < 0.";
 GTcandidates::usage = "GTcandidates[\[Lambda], P, x] lists the Gelfand-Tsetlin patterns Q of \[Lambda] for which CGcoef[P, \[PlusMinus]x, Q] can be non-zero.";
-CG::usage = "CG[\[Mu], \[Lambda]] gives the Clebsch-Gordan tensor with entries C[[x, i, j]] = CGcoef[GTPatterns[\[Mu]][[i]], \[PlusMinus]x, GTPatterns[\[Lambda]][[j]]], for \[Mu] \[CircleTimes] C^d \[RightArrow] \[Lambda] if \[Lambda] has one more cell than \[Mu] (sign +), or \[Mu] \[CircleTimes] C^d* \[RightArrow] \[Lambda] if it has one cell less (sign -).\nCG[\[Mu], \[Lambda], d] first pads \[Mu] and \[Lambda] with zeros to length d.";
+CG::usage = "CG[\[Mu], \[Lambda]] gives the Clebsch-Gordan tensor with entries C[[x, i, j]] = CGcoef[GTPatterns[\[Mu]][[i]], \[PlusMinus]x, GTPatterns[\[Lambda]][[j]]], for \[Mu] \[CircleTimes] C^d \[RightArrow] \[Lambda] if \[Lambda] is \[Mu] with one entry increased by 1 (sign +), or \[Mu] \[CircleTimes] C^d* \[RightArrow] \[Lambda] if \[Lambda] is \[Mu] with one entry decreased by 1 (sign -).\nCG[\[Mu], \[Lambda], d] first pads \[Mu] and \[Lambda] with zeros to length d.";
 
 
 (* ::Subsection:: *)
@@ -112,7 +112,7 @@ SchurBasisGivenString::usage = "SchurBasisGivenString[x, n, m, d] lists the Schu
 (*Gelfand-Tsetlin basis of the partially transposed permutations*)
 
 
-WalledContent::usage = "WalledContent[T, i] gives the signed content of the cell added (+) or removed (-) at step i of the path T: s (\[Lambda]_r - r), where r is the row that changes, s = \[PlusMinus]1, and \[Lambda] is the staircase after adding, or before removing, the cell.";
+WalledContent::usage = "WalledContent[T, i] gives the signed content s (\[Lambda]_r - r) of step i of the path T, at which entry r of the staircase increases (s = 1) or decreases (s = -1) by 1; \[Lambda] is the staircase after the step if s = 1 and before it if s = -1.";
 AxialDistance::usage = "AxialDistance[T, i] gives WalledContent[T, i + 1] - WalledContent[T, i], which determines how the transposition (i, i + 1) acts on the Gelfand-Tsetlin basis vector T.";
 TranspositionGT::usage = "TranspositionGT[i, n, m, d] gives, for every irrep in Irreps[n, m, d], the matrix of the transposition (i, i + 1), i != n, in the Gelfand-Tsetlin basis PathsToIrrepWBA.";
 ContractionGT::usage = "ContractionGT[n, m, d] gives, for every irrep in Irreps[n, m, d], the matrix of the contraction generator (partial transpose of the swap of tensor factors n and n + 1) in the Gelfand-Tsetlin basis PathsToIrrepWBA.";
@@ -131,7 +131,7 @@ generatorsGT::usage = "generatorsGT is a deprecated name of GeneratorsGT.";
 
 ToStaircase::height = "The partitions `1` and `2` have more than `3` rows in total.";
 CG::length = "The staircases `1` and `2` have different lengths.";
-CG::step = "The staircase `2` is not obtained from `1` by adding or removing a single cell.";
+CG::step = "The staircase `2` is not obtained from `1` by increasing or decreasing a single entry by 1.";
 TranspositionGT::contraction = "The generator `1` = n is the contraction, not a transposition. Use ContractionGT instead.";
 ContractionGT::none = "There is no contraction generator for n = `1`, m = `2`: both must be positive.";
 
@@ -362,8 +362,8 @@ CGcoef[P_, x_, Q_] := CGcoef[P, x, Q] = With[{d = Length@P, k = Abs@x, w = weigh
 	]
 ]
 
-(* Build Q row by row from the bottom row \[Lambda] upwards: rows of length < x equal those of P, while rows of length >= x
-   differ from those of P by the same cell (s = \[PlusMinus]1) by which \[Lambda] differs from the last row of P *)
+(* Build Q row by row from the bottom row \[Lambda] upwards. Rows of length < x equal those of P, while every row of length >= x
+   differs from that of P in a single entry, at any position, by s = Total[\[Lambda] - Last@P] = \[PlusMinus]1 *)
 GTcandidates[\[Lambda]_, P_, x_] := GTcandidates[\[Lambda], P, x] = Module[{s = Total[\[Lambda] - Last@P], compatibleQ, extend},
 	compatibleQ[row_] := With[{k = Length@row},
 		If[k >= x, stepPosition[P[[k]], row, s] =!= None, row === P[[k]]]
