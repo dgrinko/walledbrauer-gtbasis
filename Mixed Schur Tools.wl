@@ -20,6 +20,8 @@
 (*  GT pattern  a list of rows {P_1, ..., P_d}, row k of length k, with P_d = lambda.*)
 (*              Patterns label the Gelfand-Tsetlin basis of the U(d) irrep lambda.*)
 (*  string      a list x of n + m letters from {1, ..., d}, labelling the standard basis vector |x_1 ... x_(n+m)>.*)
+(*  tableaux    the pair {left tableau, right tableau} of mixed Young tableaux equivalent to a path: step i labels*)
+(*              the cell it adds by {i}; a step that removes a cell of the left tableau appends i to its label.*)
 
 
 BeginPackage["MixedSchurTools`"];
@@ -41,6 +43,10 @@ ToPair::usage = "ToPair[\[Lambda]] splits the staircase \[Lambda] into {left par
 TransposePartition::usage = "TransposePartition[\[Lambda]] gives the conjugate (transposed) partition of \[Lambda].";
 AddCell::usage = "AddCell[\[Lambda], i] adds a cell to row i of \[Lambda].";
 AddableCells::usage = "AddableCells[\[Lambda]] lists the rows of \[Lambda] (a list of fixed length) to which a cell can be added so that \[Lambda] stays non-increasing.";
+AddableCellPositions::usage = "AddableCellPositions[\[Lambda]] lists the positions {row, column} of the cells that can be added to the Young diagram of the partition \[Lambda], including the first cell of a new row.";
+RemovableCellPositions::usage = "RemovableCellPositions[\[Lambda]] lists the positions {row, column} of the cells that can be removed from the Young diagram of the partition \[Lambda].";
+CellContent::usage = "CellContent[{row, column}] gives the content column - row of a cell of a Young diagram.";
+TransitionWeight::usage = "TransitionWeight[\[Lambda], a] gives the transition probability of the addable cell a of the partition \[Lambda]: the product of c(a) - c(r) over the removable cells r divided by the product of c(a) - c(b) over the other addable cells b, where c is the content. The weights of all addable cells sum to 1, and (d + c(a)) TransitionWeight[\[Lambda], a] is the ratio of the dimensions of the U(d) irreps \[Lambda] + a and \[Lambda].";
 DisplayStaircase::usage = "DisplayStaircase[\[Lambda]] draws the staircase \[Lambda] as two Young diagrams separated by a thick wall: positive rows to the right of the wall, negative rows to the left.";
 Id::usage = "Id[n] gives the n\[Times]n identity matrix as a SparseArray.";
 Enumerate::usage = "Enumerate[list] pairs every element of list with its position: {{e1, 1}, {e2, 2}, ...}.";
@@ -52,15 +58,19 @@ Enumerate::usage = "Enumerate[list] pairs every element of list with its positio
 
 BratteliLevelsWBA::usage = "BratteliLevelsWBA[n, m, d] gives the vertices {\[Lambda], level} of the Bratteli diagram of the walled Brauer algebra acting on (C^d)^n \[CircleTimes] (C^d*)^m, grouped by level 0, ..., n + m.";
 OrderWBA::usage = "OrderWBA[u, v] is True if the walled Brauer Bratteli diagram has an edge from vertex u to vertex v: v is one level higher and its staircase differs from that of u in a single entry.";
-BratteliDiagramWBA::usage = "BratteliDiagramWBA[n, m, d] gives the walled Brauer Bratteli diagram as a Graph. Hover over a vertex to see its staircase.";
+BratteliDiagramWBA::usage = "BratteliDiagramWBA[n, m, d] gives the walled Brauer Bratteli diagram as a Graph. Hover over a vertex to see its staircase.\nBratteliDiagramWBA[levels] gives the Bratteli diagram with the given levels of vertices, such as a modified BratteliLevelsWBA[n, m, d].";
 BratteliDiagramWBALabelled::usage = "BratteliDiagramWBALabelled[n, m, d] draws the walled Brauer Bratteli diagram with every vertex labelled by its staircase.";
 Irreps::usage = "Irreps[n, m, d] lists the staircases of the irreps appearing in the mixed Schur-Weyl duality on (C^d)^n \[CircleTimes] (C^d*)^m.";
 PathsToIrrepWBA::usage = "PathsToIrrepWBA[\[Lambda], n, m, d] lists the paths of n + m staircases from the root of the Bratteli diagram to the irrep \[Lambda]. They label the Gelfand-Tsetlin basis of the walled Brauer irrep \[Lambda].";
 IrrepDimWBA::usage = "IrrepDimWBA[\[Lambda], n, m, d] gives the dimension of the walled Brauer irrep \[Lambda].";
-AllPathsWBA::usage = "AllPathsWBA[n, m, d] gives PathsToIrrepWBA for every irrep in Irreps[n, m, d].";
+AllPathsWBA::usage = "AllPathsWBA[n, m, d] gives PathsToIrrepWBA for every irrep in Irreps[n, m, d].\nAllPathsWBA[levels] lists, for every vertex of the last level, the paths from the root in BratteliDiagramWBA[levels].";
 IrrepDimsWBA::usage = "IrrepDimsWBA[n, m, d] gives the dimensions of the walled Brauer irreps, in the order of Irreps[n, m, d].";
 AssociationIrrepsWBA::usage = "AssociationIrrepsWBA[n, m, d] maps every irrep to its position in Irreps[n, m, d].";
 AssociationPathsToIrrepWBA::usage = "AssociationPathsToIrrepWBA[\[Lambda], n, m, d] maps every path to \[Lambda] to its position in PathsToIrrepWBA[\[Lambda], n, m, d].";
+
+PathToYoungTableaux::usage = "PathToYoungTableaux[T] gives the pair {left tableau, right tableau} of mixed Young tableaux equivalent to the path T. Step i labels the cell it adds by {i}; a step that removes a cell from the left partition appends i to the label of that cell. A tableau is a list of rows, a row a list of cell labels.";
+DisplayYoungTableaux::usage = "DisplayYoungTableaux[{left, right}] draws a pair of mixed Young tableaux.";
+DisplayPath::usage = "DisplayPath[T] draws the path T as its pair of mixed Young tableaux.";
 
 
 (* ::Subsection:: *)
@@ -74,7 +84,7 @@ BratteliDiagramGL::usage = "BratteliDiagramGL[n, m, d] gives the Bratteli diagra
 AllGTPatterns::usage = "AllGTPatterns[n, m, d] lists, for every irrep in Irreps[n, m, d], its Gelfand-Tsetlin patterns, found as paths in BratteliDiagramGL[n, m, d].";
 IrrepDimsGL::usage = "IrrepDimsGL[n, m, d] gives the dimensions of the U(d) irreps, in the order of Irreps[n, m, d].";
 GTPatterns::usage = "GTPatterns[\[Lambda]] lists the Gelfand-Tsetlin patterns {P_1, ..., P_d} (row k of length k, P_d = \[Lambda]) of the U(d) irrep \[Lambda] in reverse lexicographic order. They label its Gelfand-Tsetlin basis.";
-WeylDim::usage = "WeylDim[\[Lambda]] gives the dimension of the U(d) irrep \[Lambda], d = Length[\[Lambda]], by the Weyl dimension formula.";
+WeylDim::usage = "WeylDim[\[Lambda]] gives the dimension of the U(d) irrep \[Lambda], d = Length[\[Lambda]], by the Weyl dimension formula.\nWeylDim[\[Lambda], d] gives the dimension of the U(d) irrep labelled by the partition \[Lambda].";
 AssociationGTPatterns::usage = "AssociationGTPatterns[\[Lambda]] maps every Gelfand-Tsetlin pattern of \[Lambda] to its position in GTPatterns[\[Lambda]].";
 
 
@@ -112,11 +122,13 @@ SchurBasisGivenString::usage = "SchurBasisGivenString[x, n, m, d] lists the Schu
 (*Gelfand-Tsetlin basis of the partially transposed permutations*)
 
 
-WalledContent::usage = "WalledContent[T, i] gives the signed content s (\[Lambda]_r - r) of step i of the path T, at which entry r of the staircase increases (s = 1) or decreases (s = -1) by 1; \[Lambda] is the staircase after the step if s = 1 and before it if s = -1.";
-AxialDistance::usage = "AxialDistance[T, i] gives WalledContent[T, i + 1] - WalledContent[T, i], which determines how the transposition (i, i + 1) acts on the Gelfand-Tsetlin basis vector T.";
-TranspositionGT::usage = "TranspositionGT[i, n, m, d] gives, for every irrep in Irreps[n, m, d], the matrix of the transposition (i, i + 1), i != n, in the Gelfand-Tsetlin basis PathsToIrrepWBA.";
-ContractionGT::usage = "ContractionGT[n, m, d] gives, for every irrep in Irreps[n, m, d], the matrix of the contraction generator (partial transpose of the swap of tensor factors n and n + 1) in the Gelfand-Tsetlin basis PathsToIrrepWBA.";
-GeneratorsGT::usage = "GeneratorsGT[n, m, d] gives the Gelfand-Tsetlin basis matrices of all generators \[Sigma]_1, ..., \[Sigma]_(n+m-1): TranspositionGT for i != n and ContractionGT for i = n.";
+WalledContent::usage = "WalledContent[T, i] gives the content of the cell that step i of the path T adds to the left partition, minus the content of the cell it removes from the left partition, or the walled content d - k + c of the cell (row k, column c) it adds to the right partition.\nWalledContent[T, i, d] uses the given d instead of the length of the staircases, which allows staircases padded beyond length d.";
+AxialDistance::usage = "AxialDistance[T, i] gives WalledContent[T, i + 1] - WalledContent[T, i], which determines how the transposition (i, i + 1) acts on the Gelfand-Tsetlin basis vector T.\nAxialDistance[T, i, d] uses WalledContent[T, i, d].";
+TranspositionGT::usage = "TranspositionGT[i, n, m, d] gives, for every irrep in Irreps[n, m, d], the matrix of the transposition (i, i + 1), i != n, in the Gelfand-Tsetlin basis PathsToIrrepWBA.\nTranspositionGT[i, n, m, d, paths] uses as basis the given list of paths for each irrep, such as AllPathsWBA[levels] for modified Bratteli levels.";
+ContractionGT::usage = "ContractionGT[n, m, d] gives, for every irrep in Irreps[n, m, d], the matrix of the contraction generator (partial transpose of the swap of tensor factors n and n + 1) in the Gelfand-Tsetlin basis PathsToIrrepWBA.\nContractionGT[n, m, d, paths] uses as basis the given list of paths for each irrep.\nWith the option \"Weight\" -> w, the coefficient of the path through T_(n-1) + a in the image of a path through T_(n-1) + b is Sqrt[w[\[Mu], a] w[\[Mu], b]], where \[Mu] is the partition T_(n-1); the default is w[\[Mu], a] = (d + CellContent[a]) TransitionWeight[\[Mu], a]. \"Weight\" -> TransitionWeight gives the rank-one projectors used for the Naimark dilation of port-based teleportation.";
+GeneratorsGT::usage = "GeneratorsGT[n, m, d] gives the Gelfand-Tsetlin basis matrices of all generators \[Sigma]_1, ..., \[Sigma]_(n+m-1): TranspositionGT for i != n and ContractionGT for i = n. The result is indexed as [[i, irrep]].\nGeneratorsGT[n, m, d, paths] uses as basis the given list of paths for each irrep.";
+CheckRelationsWBA::usage = "CheckRelationsWBA[{\[Sigma]_1, ..., \[Sigma]_(n+m-1)}, n, m, d] checks the defining relations of the walled Brauer algebra for the matrices \[Sigma]_i of its generators in one representation, \[Sigma]_n being the contraction. It gives an Association from each family of relations to the list of its results; all of them are True for a representation.";
+MatrixUnit::usage = "MatrixUnit[T, S] gives, as a d^(n+m)\[Times]d^(n+m) matrix in the standard basis, the matrix unit of the walled Brauer algebra that maps the Gelfand-Tsetlin basis vector S to T, for two paths T and S to the same irrep: the sum over all Gelfand-Tsetlin patterns P of |T, P><S, P|.";
 
 
 (* ::Subsection:: *)
@@ -134,6 +146,8 @@ CG::length = "The staircases `1` and `2` have different lengths.";
 CG::step = "The staircase `2` is not obtained from `1` by increasing or decreasing a single entry by 1.";
 TranspositionGT::contraction = "The generator `1` = n is the contraction, not a transposition. Use ContractionGT instead.";
 ContractionGT::none = "There is no contraction generator for n = `1`, m = `2`: both must be positive.";
+GeneratorsGT::path = "The path `1` that a generator maps to is not among the given paths; its matrix entry is dropped.";
+MatrixUnit::irrep = "The paths `1` and `2` lead to different irreps.";
 
 
 Begin["`Private`"];
@@ -160,6 +174,17 @@ stepPosition[old_, new_, s_] := With[{diff = new - old},
 	If[Count[diff, 0] == Length@diff - 1 && Count[diff, s] == 1, First@FirstPosition[diff, s], None]
 ]
 
+(* What a step from the staircase before to the staircase after does, as {"add", cell} or {"remove", cell} for a cell
+   {row, column} of the left partition, or {"right", cell} for a cell added to the right partition. Its row k sits at
+   entry L - k + 1 of a staircase of length L. *)
+stepCell[before_, after_] := With[{r = First@FirstPosition[Abs[after - before], 1]},
+	Which[
+		after[[r]] > before[[r]], {"add", {r, after[[r]]}},
+		before[[r]] > 0, {"remove", {r, before[[r]]}},
+		True, {"right", {Length@after - r + 1, 1 - before[[r]]}}
+	]
+]
+
 (* Staircases along a path of Bratteli diagram vertices {staircase, level}, without the root *)
 pathStaircases[vertices_] := Rest[vertices][[All, 1]]
 
@@ -183,6 +208,20 @@ TransposePartition[\[Lambda]_] := Table[Count[\[Lambda], row_ /; row >= i], {i, 
 AddCell[\[Lambda]_, i_] := \[Lambda] + UnitVector[Length@\[Lambda], i]
 
 AddableCells[\[Lambda]_] := Prepend[Select[Range[2, Length@\[Lambda]], \[Lambda][[# - 1]] > \[Lambda][[#]] &], 1]
+
+CellContent[{row_, column_}] := column - row
+
+AddableCellPositions[\[Lambda]_] := With[{rows = Append[DeleteCases[\[Lambda], 0], 0]},
+	Table[If[i == 1 || rows[[i]] < rows[[i - 1]], {i, rows[[i]] + 1}, Nothing], {i, Length@rows}]
+]
+
+RemovableCellPositions[\[Lambda]_] := With[{rows = DeleteCases[\[Lambda], 0]},
+	Table[If[i == Length@rows || rows[[i]] > rows[[i + 1]], {i, rows[[i]]}, Nothing], {i, Length@rows}]
+]
+
+TransitionWeight[\[Lambda]_, a_] :=
+	Product[CellContent@a - CellContent@r, {r, RemovableCellPositions@\[Lambda]}] /
+	Product[CellContent@a - CellContent@b, {b, DeleteCases[AddableCellPositions@\[Lambda], a]}]
 
 Id[dim_] := SparseArray[{Band[{1, 1}] -> 1}, {dim, dim}]
 
@@ -225,7 +264,9 @@ BratteliLevelsWBA[n_, m_, d_] := BratteliLevelsWBA[n, m, d] = Join[
 
 OrderWBA[{\[Mu]_, i_}, {\[Lambda]_, j_}] := j == i + 1 && Count[\[Mu] - \[Lambda], 0] == Length@\[Mu] - 1
 
-BratteliDiagramWBA[n_, m_, d_] := BratteliDiagramWBA[n, m, d] = With[{vertices = Catenate@BratteliLevelsWBA[n, m, d]},
+BratteliDiagramWBA[n_, m_, d_] := BratteliDiagramWBA[n, m, d] = BratteliDiagramWBA@BratteliLevelsWBA[n, m, d]
+
+BratteliDiagramWBA[levels_List] := With[{vertices = Catenate@levels},
 	RelationGraph[OrderWBA, vertices,
 		VertexSize -> 0.2,
 		VertexStyle -> LightBlue,
@@ -253,12 +294,44 @@ IrrepDimWBA[\[Lambda]_, n_, m_, d_] := IrrepDimWBA[\[Lambda], n, m, d] = Length@
 
 AllPathsWBA[n_, m_, d_] := AllPathsWBA[n, m, d] = PathsToIrrepWBA[#, n, m, d] & /@ Irreps[n, m, d]
 
+AllPathsWBA[levels_List] := With[{graph = BratteliDiagramWBA@levels, root = First@First@levels},
+	Table[pathStaircases /@ FindPath[graph, root, vertex, {Length@levels - 1}, All], {vertex, Last@levels}]
+]
+
 IrrepDimsWBA[n_, m_, d_] := IrrepDimsWBA[n, m, d] = Length /@ AllPathsWBA[n, m, d]
 
 AssociationIrrepsWBA[n_, m_, d_] := AssociationIrrepsWBA[n, m, d] = indexAssociation@Irreps[n, m, d]
 
 AssociationPathsToIrrepWBA[\[Lambda]_, n_, m_, d_] := AssociationPathsToIrrepWBA[\[Lambda], n, m, d] =
 	indexAssociation@PathsToIrrepWBA[\[Lambda], n, m, d]
+
+
+(* ::Subsection:: *)
+(*Mixed Young tableaux*)
+
+
+PathToYoungTableaux[T_] := Module[{path = withRoot@T, steps},
+	steps = Table[Append[stepCell[path[[i]], path[[i + 1]]], i], {i, Length@T}];
+	{
+		toTableau@Cases[steps, {"add", cell_, i_} :> (cell -> Prepend[Cases[steps, {"remove", cell, j_} :> j], i])],
+		toTableau@Cases[steps, {"right", cell_, i_} :> (cell -> {i})]
+	}
+]
+
+(* Rows of a tableau given as a list of rules {row, column} -> label *)
+toTableau[cells_] := With[{positions = cells[[All, 1]]},
+	Table[Replace[{row, column}, cells], {row, Max[0, First /@ positions]}, {column, Count[positions, {row, _}]}]
+]
+
+displayTableau[{}] := "\[EmptySet]"
+displayTableau[tableau_] := Grid[
+	Map[StringRiffle[ToString /@ #, ","] &, tableau, {2}],
+	Frame -> {None, None, Flatten[Table[{i, j} -> True, {i, Length@tableau}, {j, Length@tableau[[i]]}], 1]}
+]
+
+DisplayYoungTableaux[{left_, right_}] := Row[{displayTableau@left, displayTableau@right}, Spacer[12]]
+
+DisplayPath[T_] := DisplayYoungTableaux@PathToYoungTableaux@T
 
 
 (* ::Section:: *)
@@ -304,6 +377,8 @@ WeylDim[\[Lambda]_] := Product[
 	(\[Lambda][[i]] - \[Lambda][[j]] + j - i) / (j - i),
 	{i, Length@\[Lambda] - 1}, {j, i + 1, Length@\[Lambda]}
 ]
+
+WeylDim[\[Lambda]_, d_] := WeylDim@PadRight[\[Lambda], d]
 
 AssociationGTPatterns[\[Lambda]_] := AssociationGTPatterns[\[Lambda]] = indexAssociation@GTPatterns@\[Lambda]
 
@@ -486,60 +561,142 @@ SchurBasisGivenString[x_, n_, m_, d_] := With[{weight = Weight[x, n, m, d]},
 SchurTransform[n_, m_, d_] := SchurTransform[n, m, d] = schurTransform[n, m, d, SchurBasisGivenString[#, n, m, d] &]
 
 
+(* ::Subsection:: *)
+(*Matrix units*)
+
+
+(* Columns: the Schur basis vectors |T, P> for all GT patterns P of Last[T], in the standard basis *)
+schurVectors[T_] := SparseArray[CGmatProduct[#, T] & /@ StandardBasis[Length@T, Length@Last@T]]
+
+MatrixUnit[T_, S_] := If[Last@T =!= Last@S,
+	Message[MatrixUnit::irrep, T, S]; $Failed,
+	schurVectors[T] . Transpose@schurVectors[S]
+]
+
+
 (* ::Section:: *)
 (*Gelfand-Tsetlin basis of the partially transposed permutations*)
 
 
-WalledContent[T_, i_] := Module[{path = withRoot@T, step, s, row},
-	step = path[[i + 1]] - path[[i]];
-	s = Total@step;
-	row = FirstPosition[Abs@step, 1];
-	If[MissingQ@row, 1, s (path[[If[s > 0, i + 1, i], First@row]] - First@row)]
+(* The walled content d - k + c of a right cell {k, c} is measured from the wall, so that it does not depend on the
+   length of the staircases *)
+WalledContent[T_, i_, d_ : Automatic] := With[{path = withRoot@T},
+	If[MissingQ@FirstPosition[Abs[path[[i + 1]] - path[[i]]], 1],
+		1,
+		Replace[stepCell[path[[i]], path[[i + 1]]], {
+			{"add", cell_} :> CellContent@cell,
+			{"remove", cell_} :> -CellContent@cell,
+			{"right", {k_, c_}} :> Replace[d, Automatic -> Length@Last@T] - k + c
+		}]
+	]
 ]
 
-AxialDistance[T_, i_] := WalledContent[T, i + 1] - WalledContent[T, i]
+AxialDistance[T_, i_, d_ : Automatic] := WalledContent[T, i + 1, d] - WalledContent[T, i, d]
 
 (* The path T with steps i and i + 1 performed in the opposite order *)
 swapSteps[T_, i_] := ReplacePart[T, i -> withRoot[T][[i]] + T[[i + 1]] - T[[i]]]
 
-(* Matrix of an operator on the walled Brauer irrep \[Lambda] in the GT basis. The function entries[T, index] gives
-   the non-zero entries {index[T], index[S]} -> value of the row of the basis path T. *)
-irrepMatrix[\[Lambda]_, n_, m_, d_, entries_] := With[
-	{index = AssociationPathsToIrrepWBA[\[Lambda], n, m, d], dim = IrrepDimWBA[\[Lambda], n, m, d]},
-	SparseArray[Catenate[entries[#, index] & /@ PathsToIrrepWBA[\[Lambda], n, m, d]], {dim, dim}]
+(* The cell {row, column} that is added going from the staircase \[Mu] to the staircase \[Nu] *)
+addedCell[\[Mu]_, \[Nu]_] := With[{row = First@FirstPosition[\[Nu] - \[Mu], 1]}, {row, \[Nu][[row]]}]
+
+(* The matrix entry {index[T], index[S]} -> value, or Nothing with a message if S is not a basis path *)
+matrixEntry[index_, T_, S_, value_] := If[KeyExistsQ[index, S],
+	{index@T, index@S} -> value,
+	Message[GeneratorsGT::path, S]; Nothing
+]
+
+(* Matrix of an operator in the basis of the given paths of one irrep. The function entries[T, index] gives the
+   non-zero entries {index[T], index[S]} -> value of the row of the basis path T. *)
+irrepMatrix[paths_, entries_] := With[{index = indexAssociation@paths, dim = Length@paths},
+	SparseArray[Catenate[entries[#, index] & /@ paths], {dim, dim}]
 ]
 
 (* Young's orthogonal form: \[Sigma]_i T = T / r + Sqrt[1 - 1 / r^2] swapSteps[T, i], with r the axial distance *)
-transpositionEntries[T_, index_, i_] := With[{r = AxialDistance[T, i]},
+transpositionEntries[T_, index_, i_, d_] := With[{r = AxialDistance[T, i, d]},
 	If[Abs@r == 1,
 		{{index@T, index@T} -> r},
-		{{index@T, index@T} -> 1 / r, {index@T, index@swapSteps[T, i]} -> Sqrt[1 - 1 / r^2]}
+		{{index@T, index@T} -> 1 / r, matrixEntry[index, T, swapSteps[T, i], Sqrt[1 - 1 / r^2]]}
 	]
 ]
 
-(* Non-zero only if the path returns to T_(n-1) at step n + 1; it then maps to all paths through T_(n-1) + one cell *)
-contractionEntries[T_, index_, n_] := With[{\[Mu] = withRoot[T][[n]]},
+(* Non-zero only if the path adds a cell b to \[Mu] = T_(n-1) at step n and removes it again at step n + 1. It then maps
+   to the paths through \[Mu] + a for all addable cells a, with coefficient Sqrt[weight[\[Mu], a] weight[\[Mu], b]]; cells
+   of zero weight or beyond the length of the staircases are skipped. *)
+contractionEntries[T_, index_, n_, weight_] := Module[{\[Mu] = withRoot[T][[n]], partition, wb},
 	If[\[Mu] =!= T[[n + 1]],
 		{},
+		partition = First@ToPair@\[Mu];
+		wb = weight[partition, addedCell[\[Mu], T[[n]]]];
 		Table[
-			{index@T, index@ReplacePart[T, n -> AddCell[\[Mu], row]]} ->
-				Sqrt[WeylDim[T[[n]]] WeylDim[AddCell[\[Mu], row]]] / WeylDim[\[Mu]],
-			{row, AddableCells@\[Mu]}
+			With[{wa = weight[partition, a]},
+				If[wa == 0 || First@a > Length@\[Mu],
+					Nothing,
+					matrixEntry[index, T, ReplacePart[T, n -> AddCell[\[Mu], First@a]], Sqrt[wa wb]]
+				]
+			],
+			{a, AddableCellPositions@partition}
 		]
 	]
 ]
 
-TranspositionGT[i_, n_, m_, d_] := If[i == n,
+(* The paths of every irrep in Irreps[n, m, d], unless other paths are given *)
+basisPaths[n_, m_, d_, paths_] := Replace[paths, Automatic :> AllPathsWBA[n, m, d]]
+
+TranspositionGT[i_, n_, m_, d_, paths : (_List | Automatic) : Automatic] := If[i == n,
 	Message[TranspositionGT::contraction, i]; $Failed,
-	Table[irrepMatrix[\[Lambda], n, m, d, transpositionEntries[#1, #2, i] &], {\[Lambda], Irreps[n, m, d]}]
+	irrepMatrix[#, transpositionEntries[#1, #2, i, d] &] & /@ basisPaths[n, m, d, paths]
 ]
 
-ContractionGT[n_, m_, d_] := If[n < 1 || m < 1,
+Options[ContractionGT] = {"Weight" -> Automatic};
+
+ContractionGT[n_, m_, d_, paths : (_List | Automatic) : Automatic, OptionsPattern[]] := If[n < 1 || m < 1,
 	Message[ContractionGT::none, n, m]; $Failed,
-	Table[irrepMatrix[\[Lambda], n, m, d, contractionEntries[#1, #2, n] &], {\[Lambda], Irreps[n, m, d]}]
+	With[{weight = Replace[OptionValue["Weight"], Automatic -> ((d + CellContent[#2]) TransitionWeight[#1, #2] &)]},
+		irrepMatrix[#, contractionEntries[#1, #2, n, weight] &] & /@ basisPaths[n, m, d, paths]
+	]
 ]
 
-GeneratorsGT[n_, m_, d_] := Table[If[i == n, ContractionGT[n, m, d], TranspositionGT[i, n, m, d]], {i, n + m - 1}]
+GeneratorsGT[n_, m_, d_, paths : (_List | Automatic) : Automatic] := With[{basis = basisPaths[n, m, d, paths]},
+	Table[If[i == n, ContractionGT[n, m, d, basis], TranspositionGT[i, n, m, d, basis]], {i, n + m - 1}]
+]
+
+
+(* ::Subsection:: *)
+(*Relations of the walled Brauer algebra*)
+
+
+CheckRelationsWBA[\[Sigma]_List, n_, m_, d_] := Module[
+	{k = Length@\[Sigma], id = IdentityMatrix@Length@First@\[Sigma], transpositions, distant},
+	transpositions = DeleteCases[Range@k, n];
+	distant = Complement[Range@k, {n - 1, n, n + 1}];
+	<|
+		"\[Sigma]_i^2 = 1" -> Table[\[Sigma][[i]] . \[Sigma][[i]] == id, {i, transpositions}],
+		"\[Sigma]_i \[Sigma]_(i+1) \[Sigma]_i = \[Sigma]_(i+1) \[Sigma]_i \[Sigma]_(i+1)" -> Table[
+			\[Sigma][[i]] . \[Sigma][[i + 1]] . \[Sigma][[i]] == \[Sigma][[i + 1]] . \[Sigma][[i]] . \[Sigma][[i + 1]],
+			{i, Select[Range[k - 1], # <= n - 2 || # >= n + 1 &]}
+		],
+		"\[Sigma]_i \[Sigma]_j = \[Sigma]_j \[Sigma]_i for |i - j| > 1" -> Flatten@Table[
+			If[Abs[i - j] > 1, \[Sigma][[j]] . \[Sigma][[i]] == \[Sigma][[i]] . \[Sigma][[j]], Nothing],
+			{i, transpositions}, {j, transpositions}
+		],
+		"\[Sigma]_n^2 = d \[Sigma]_n" -> If[1 <= n <= k, {\[Sigma][[n]] . \[Sigma][[n]] == d \[Sigma][[n]]}, {}],
+		"\[Sigma]_n \[Sigma]_(n\[PlusMinus]1) \[Sigma]_n = \[Sigma]_n" -> {
+			If[2 <= n <= k, \[Sigma][[n]] . \[Sigma][[n - 1]] . \[Sigma][[n]] == \[Sigma][[n]], Nothing],
+			If[m >= 2 && n >= 1, \[Sigma][[n]] . \[Sigma][[n + 1]] . \[Sigma][[n]] == \[Sigma][[n]], Nothing]
+		},
+		"\[Sigma]_n \[Sigma]_i = \[Sigma]_i \[Sigma]_n for |i - n| > 1" ->
+			If[1 <= n <= k, Table[\[Sigma][[n]] . \[Sigma][[i]] == \[Sigma][[i]] . \[Sigma][[n]], {i, distant}], {}],
+		"\[Sigma]_n \[Sigma]_(n+1) \[Sigma]_(n-1) \[Sigma]_n (\[Sigma]_(n-1) - \[Sigma]_(n+1)) = 0 = (\[Sigma]_(n-1) - \[Sigma]_(n+1)) \[Sigma]_n \[Sigma]_(n+1) \[Sigma]_(n-1) \[Sigma]_n" -> If[Min[n, m] >= 2,
+			{
+				\[Sigma][[n]] . \[Sigma][[n + 1]] . \[Sigma][[n - 1]] . \[Sigma][[n]] . \[Sigma][[n - 1]] ==
+					\[Sigma][[n]] . \[Sigma][[n + 1]] . \[Sigma][[n - 1]] . \[Sigma][[n]] . \[Sigma][[n + 1]],
+				\[Sigma][[n - 1]] . \[Sigma][[n]] . \[Sigma][[n + 1]] . \[Sigma][[n - 1]] . \[Sigma][[n]] ==
+					\[Sigma][[n + 1]] . \[Sigma][[n]] . \[Sigma][[n + 1]] . \[Sigma][[n - 1]] . \[Sigma][[n]]
+			},
+			{}
+		]
+	|>
+]
 
 
 (* ::Section:: *)
