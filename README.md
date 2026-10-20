@@ -46,7 +46,7 @@ Get[FileNameJoin[{NotebookDirectory[], "Mixed Schur Tools.wl"}]]
 Get[FileNameJoin[{ParentDirectory[NotebookDirectory[]], "Mixed Schur Tools.wl"}]]
 ```
 
-The notebooks are saved without outputs. Open one and choose Evaluation > Evaluate Notebook to see the results. Their first cell loads the package and is an initialization cell, so Mathematica offers to evaluate it as soon as you evaluate any other cell.
+The notebooks are saved without outputs. Open one and choose Evaluation > Evaluate Notebook to see the results. Their first input cell, under Setup, loads the package and is an initialization cell, so Mathematica offers to evaluate it as soon as you evaluate any other cell.
 
 Load the package before you evaluate any cell that uses its functions. If a cell that mentions, say, `CG` runs first, Mathematica creates an empty ``Global`CG`` and reports `CG::shdw` when the package loads. Definitions evaluated before loading keep referring to that empty symbol. To recover, run ``Remove["Global`CG"]`` and evaluate those cells again, or quit the kernel and evaluate the notebook from the top.
 
@@ -111,7 +111,7 @@ Row `i` of `SchurTransform[n, m, d]` is the Schur basis vector `SchurBasis[n, m,
 | `OrderWBA[u, v]` | Edge relation of the Bratteli diagram. |
 | `Irreps[n, m, d]` | Irreps appearing in $(\mathbb{C}^d)^{\otimes n} \otimes (\mathbb{C}^{d*})^{\otimes m}$. |
 | `PathsToIrrepWBA`, `AllPathsWBA`, `IrrepDimWBA`, `IrrepDimsWBA` | GT basis paths and dimensions of the walled Brauer irreps. `AllPathsWBA[levels]` gives the paths in a diagram with modified levels. |
-| `PathToYoungTableaux[T]`, `DisplayYoungTableaux[{left, right}]`, `DisplayPath[T]` | A path as a pair of mixed Young tableaux, and drawings of them. |
+| `PathToYoungTableaux[T]`, `DisplayYoungTableaux[{left, right}]`, `DisplayYoungTableau[t]`, `DisplayPath[T]` | A path as a pair of mixed Young tableaux, and drawings of a pair, of a single tableau and of a path. |
 | `AssociationIrrepsWBA`, `AssociationPathsToIrrepWBA` | Positions of irreps and of paths. |
 
 **Unitary group**
@@ -170,7 +170,9 @@ The first version of this code was a separate package, `v1/walled_brauer_gt_basi
 | v1 function | Package function |
 | --- | --- |
 | `BratteliLevels`, `BratteliDiagram`, `Irreps`, `AllPaths`, `IrrepDims` | `BratteliLevelsWBA`, `BratteliDiagramWBA`, `Irreps`, `AllPathsWBA`, `IrrepDimsWBA` (staircases instead of pairs of partitions) |
-| `PathToYoungTableauxPair`, `DisplayPathAsYT`, `DisplayAllPathsAsYT` | `PathToYoungTableaux`, `DisplayPath`, `Map[DisplayPath, AllPathsWBA[n, m, d], {2}]` |
+| `PathToYoungTableauxPair`, `TransformAllPathToYT` | `PathToYoungTableaux`, `Map[PathToYoungTableaux, AllPathsWBA[n, m, d], {2}]` |
+| `DisplayYoungDiagram`, `DisplayYoungTableaux` (one tableau), `DisplayYoungTableauxPair` | `DisplayStaircase`, `DisplayYoungTableau`, `DisplayYoungTableaux` (a pair) |
+| `DisplayPathAsYT`, `DisplayAllPathsAsYT` | `DisplayPath`, `Map[DisplayPath, AllPathsWBA[n, m, d], {2}]` |
 | `AddCellPositions`, `RemoveCellPositions`, `Content`, `ConjugatePartition`, `m[λ, d]` | `AddableCellPositions`, `RemovableCellPositions`, `CellContent`, `TransposePartition`, `WeylDim[λ, d]` |
 | `wCoord`, `HookDistance` (axial distances in walled coordinates) | `WalledContent`, `AxialDistance` |
 | `AllGeneratorsGT[p, q, d, paths]` | `GeneratorsGT[n, m, d, paths]` |

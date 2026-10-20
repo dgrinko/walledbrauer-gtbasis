@@ -69,7 +69,8 @@ AssociationIrrepsWBA::usage = "AssociationIrrepsWBA[n, m, d] maps every irrep to
 AssociationPathsToIrrepWBA::usage = "AssociationPathsToIrrepWBA[\[Lambda], n, m, d] maps every path to \[Lambda] to its position in PathsToIrrepWBA[\[Lambda], n, m, d].";
 
 PathToYoungTableaux::usage = "PathToYoungTableaux[T] gives the pair {left tableau, right tableau} of mixed Young tableaux equivalent to the path T. Step i labels the cell it adds by {i}; a step that removes a cell from the left partition appends i to the label of that cell. A tableau is a list of rows, a row a list of cell labels.";
-DisplayYoungTableaux::usage = "DisplayYoungTableaux[{left, right}] draws a pair of mixed Young tableaux.";
+DisplayYoungTableau::usage = "DisplayYoungTableau[t] draws one Young tableau t, given as a list of rows of cell labels; the empty tableau is drawn as \[EmptySet].";
+DisplayYoungTableaux::usage = "DisplayYoungTableaux[{left, right}] draws a pair of mixed Young tableaux side by side.";
 DisplayPath::usage = "DisplayPath[T] draws the path T as its pair of mixed Young tableaux.";
 
 
@@ -84,7 +85,7 @@ BratteliDiagramGL::usage = "BratteliDiagramGL[n, m, d] gives the Bratteli diagra
 AllGTPatterns::usage = "AllGTPatterns[n, m, d] lists, for every irrep in Irreps[n, m, d], its Gelfand-Tsetlin patterns, found as paths in BratteliDiagramGL[n, m, d].";
 IrrepDimsGL::usage = "IrrepDimsGL[n, m, d] gives the dimensions of the U(d) irreps, in the order of Irreps[n, m, d].";
 GTPatterns::usage = "GTPatterns[\[Lambda]] lists the Gelfand-Tsetlin patterns {P_1, ..., P_d} (row k of length k, P_d = \[Lambda]) of the U(d) irrep \[Lambda] in reverse lexicographic order. They label its Gelfand-Tsetlin basis.";
-WeylDim::usage = "WeylDim[\[Lambda]] gives the dimension of the U(d) irrep \[Lambda], d = Length[\[Lambda]], by the Weyl dimension formula.\nWeylDim[\[Lambda], d] gives the dimension of the U(d) irrep labelled by the partition \[Lambda].";
+WeylDim::usage = "WeylDim[\[Lambda]] gives the dimension of the U(d) irrep \[Lambda], d = Length[\[Lambda]], by the Weyl dimension formula.\nWeylDim[\[Lambda], d] gives the dimension of the U(d) irrep labelled by the partition \[Lambda], by the hook-content formula. It is 0 if \[Lambda] has more than d rows, and d may be symbolic.";
 AssociationGTPatterns::usage = "AssociationGTPatterns[\[Lambda]] maps every Gelfand-Tsetlin pattern of \[Lambda] to its position in GTPatterns[\[Lambda]].";
 
 
@@ -122,7 +123,7 @@ SchurBasisGivenString::usage = "SchurBasisGivenString[x, n, m, d] lists the Schu
 (*Gelfand-Tsetlin basis of the partially transposed permutations*)
 
 
-WalledContent::usage = "WalledContent[T, i] gives the content of the cell that step i of the path T adds to the left partition, minus the content of the cell it removes from the left partition, or the walled content d - k + c of the cell (row k, column c) it adds to the right partition.\nWalledContent[T, i, d] uses the given d instead of the length of the staircases, which allows staircases padded beyond length d.";
+WalledContent::usage = "WalledContent[T, i] gives the signed content of the cell that step i of the path T changes: CellContent[cell] if the step adds the cell to the left partition, -CellContent[cell] if it removes the cell from the left partition, and the walled content d - k + c if it adds the cell in row k and column c to the right partition, where d is the length of the staircases.\nWalledContent[T, i, d] uses the given d instead of the length of the staircases, which allows staircases padded beyond length d.";
 AxialDistance::usage = "AxialDistance[T, i] gives WalledContent[T, i + 1] - WalledContent[T, i], which determines how the transposition (i, i + 1) acts on the Gelfand-Tsetlin basis vector T.\nAxialDistance[T, i, d] uses WalledContent[T, i, d].";
 TranspositionGT::usage = "TranspositionGT[i, n, m, d] gives, for every irrep in Irreps[n, m, d], the matrix of the transposition (i, i + 1), i != n, in the Gelfand-Tsetlin basis PathsToIrrepWBA.\nTranspositionGT[i, n, m, d, paths] uses as basis the given list of paths for each irrep, such as AllPathsWBA[levels] for modified Bratteli levels.";
 ContractionGT::usage = "ContractionGT[n, m, d] gives, for every irrep in Irreps[n, m, d], the matrix of the contraction generator (partial transpose of the swap of tensor factors n and n + 1) in the Gelfand-Tsetlin basis PathsToIrrepWBA.\nContractionGT[n, m, d, paths] uses as basis the given list of paths for each irrep.\nWith the option \"Weight\" -> w, the coefficient of the path through T_(n-1) + a in the image of a path through T_(n-1) + b is Sqrt[w[\[Mu], a] w[\[Mu], b]], where \[Mu] is the partition T_(n-1); the default is w[\[Mu], a] = (d + CellContent[a]) TransitionWeight[\[Mu], a]. \"Weight\" -> TransitionWeight gives the rank-one projectors used for the Naimark dilation of port-based teleportation.";
@@ -323,13 +324,13 @@ toTableau[cells_] := With[{positions = cells[[All, 1]]},
 	Table[Replace[{row, column}, cells], {row, Max[0, First /@ positions]}, {column, Count[positions, {row, _}]}]
 ]
 
-displayTableau[{}] := "\[EmptySet]"
-displayTableau[tableau_] := Grid[
+DisplayYoungTableau[{}] := "\[EmptySet]"
+DisplayYoungTableau[tableau_] := Grid[
 	Map[StringRiffle[ToString /@ #, ","] &, tableau, {2}],
 	Frame -> {None, None, Flatten[Table[{i, j} -> True, {i, Length@tableau}, {j, Length@tableau[[i]]}], 1]}
 ]
 
-DisplayYoungTableaux[{left_, right_}] := Row[{displayTableau@left, displayTableau@right}, Spacer[12]]
+DisplayYoungTableaux[{left_, right_}] := Row[{DisplayYoungTableau@left, DisplayYoungTableau@right}, Spacer[12]]
 
 DisplayPath[T_] := DisplayYoungTableaux@PathToYoungTableaux@T
 
@@ -378,7 +379,9 @@ WeylDim[\[Lambda]_] := Product[
 	{i, Length@\[Lambda] - 1}, {j, i + 1, Length@\[Lambda]}
 ]
 
-WeylDim[\[Lambda]_, d_] := WeylDim@PadRight[\[Lambda], d]
+WeylDim[\[Lambda]_, d_] := With[{rows = DeleteCases[\[Lambda], 0]},
+	Product[(d + j - i) / (rows[[i]] - j + TransposePartition[rows][[j]] - i + 1), {i, Length@rows}, {j, rows[[i]]}]
+]
 
 AssociationGTPatterns[\[Lambda]_] := AssociationGTPatterns[\[Lambda]] = indexAssociation@GTPatterns@\[Lambda]
 
@@ -639,24 +642,25 @@ contractionEntries[T_, index_, n_, weight_] := Module[{\[Mu] = withRoot[T][[n]],
 	]
 ]
 
-(* The paths of every irrep in Irreps[n, m, d], unless other paths are given *)
+(* The paths of every irrep in Irreps[n, m, d], unless other paths are given. The pattern {__List} for them keeps a
+   list of options from being taken for paths. *)
 basisPaths[n_, m_, d_, paths_] := Replace[paths, Automatic :> AllPathsWBA[n, m, d]]
 
-TranspositionGT[i_, n_, m_, d_, paths : (_List | Automatic) : Automatic] := If[i == n,
+TranspositionGT[i_, n_, m_, d_, paths : ({__List} | Automatic) : Automatic] := If[i == n,
 	Message[TranspositionGT::contraction, i]; $Failed,
 	irrepMatrix[#, transpositionEntries[#1, #2, i, d] &] & /@ basisPaths[n, m, d, paths]
 ]
 
 Options[ContractionGT] = {"Weight" -> Automatic};
 
-ContractionGT[n_, m_, d_, paths : (_List | Automatic) : Automatic, OptionsPattern[]] := If[n < 1 || m < 1,
+ContractionGT[n_, m_, d_, paths : ({__List} | Automatic) : Automatic, OptionsPattern[]] := If[n < 1 || m < 1,
 	Message[ContractionGT::none, n, m]; $Failed,
 	With[{weight = Replace[OptionValue["Weight"], Automatic -> ((d + CellContent[#2]) TransitionWeight[#1, #2] &)]},
 		irrepMatrix[#, contractionEntries[#1, #2, n, weight] &] & /@ basisPaths[n, m, d, paths]
 	]
 ]
 
-GeneratorsGT[n_, m_, d_, paths : (_List | Automatic) : Automatic] := With[{basis = basisPaths[n, m, d, paths]},
+GeneratorsGT[n_, m_, d_, paths : ({__List} | Automatic) : Automatic] := With[{basis = basisPaths[n, m, d, paths]},
 	Table[If[i == n, ContractionGT[n, m, d, basis], TranspositionGT[i, n, m, d, basis]], {i, n + m - 1}]
 ]
 
@@ -666,11 +670,11 @@ GeneratorsGT[n_, m_, d_, paths : (_List | Automatic) : Automatic] := With[{basis
 
 
 CheckRelationsWBA[\[Sigma]_List, n_, m_, d_] := Module[
-	{k = Length@\[Sigma], id = IdentityMatrix@Length@First@\[Sigma], transpositions, distant},
+	{k = Length@\[Sigma], transpositions, distant},
 	transpositions = DeleteCases[Range@k, n];
 	distant = Complement[Range@k, {n - 1, n, n + 1}];
 	<|
-		"\[Sigma]_i^2 = 1" -> Table[\[Sigma][[i]] . \[Sigma][[i]] == id, {i, transpositions}],
+		"\[Sigma]_i^2 = 1" -> Table[\[Sigma][[i]] . \[Sigma][[i]] == IdentityMatrix@Length@\[Sigma][[i]], {i, transpositions}],
 		"\[Sigma]_i \[Sigma]_(i+1) \[Sigma]_i = \[Sigma]_(i+1) \[Sigma]_i \[Sigma]_(i+1)" -> Table[
 			\[Sigma][[i]] . \[Sigma][[i + 1]] . \[Sigma][[i]] == \[Sigma][[i + 1]] . \[Sigma][[i]] . \[Sigma][[i + 1]],
 			{i, Select[Range[k - 1], # <= n - 2 || # >= n + 1 &]}

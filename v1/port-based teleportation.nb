@@ -8,7 +8,7 @@ Cell["Port-based teleportation in the Gelfand-Tsetlin basis", "Title"],
 
 Cell["Pretty good measurement and its Naimark dilation", "Subtitle"],
 
-Cell[TextData[{"This notebook accompanies arXiv:2310.02252. In port-based teleportation the receiver holds n ports of dimension d, and the measurement of the sender acts on the n ports and one system of the sender, which enters through the dual representation. The relevant algebra is therefore the algebra of partially transposed permutations with n left and m = 1 right tensor factors. All computations below use the functions of ", StyleBox["Mixed Schur Tools.wl", FontFamily->"Courier"], "."}], "Text"],
+Cell[TextData[{"This notebook accompanies arXiv:2310.02252. In port-based teleportation the sender and the receiver share n maximally entangled pairs of dimension d, and the receiver's halves are the ports. The sender measures the other n halves together with the system to be teleported, which enters through the dual representation. The relevant algebra is therefore the algebra of partially transposed permutations with n left and m = 1 right tensor factors. All computations below use the functions of ", StyleBox["Mixed Schur Tools.wl", FontFamily->"Courier"], "."}], "Text"],
 
 Cell["Setup", "Section"],
 
