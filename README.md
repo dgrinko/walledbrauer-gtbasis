@@ -46,7 +46,7 @@ Get[FileNameJoin[{NotebookDirectory[], "Mixed Schur Tools.wl"}]]
 Get[FileNameJoin[{ParentDirectory[NotebookDirectory[]], "Mixed Schur Tools.wl"}]]
 ```
 
-The notebooks are saved without outputs. Open one and choose Evaluation > Evaluate Notebook to see the results. Their first input cell, under Setup, loads the package and is an initialization cell, so Mathematica offers to evaluate it as soon as you evaluate any other cell.
+The notebooks are saved without outputs. Open one and choose Evaluation > Evaluate Notebook to see the results. The setup cells load the package, set the default parameters, and initialize the display helpers. Mathematica offers to evaluate these initialization cells when needed. Each notebook uses its own context, so its example variables stay independent when several notebooks are open. Display helpers are in a closed group under Setup; expand it to customize the presentation.
 
 Load the package before you evaluate any cell that uses its functions. If a cell that mentions, say, `CG` runs first, Mathematica creates an empty ``Global`CG`` and reports `CG::shdw` when the package loads. Definitions evaluated before loading keep referring to that empty symbol. To recover, run ``Remove["Global`CG"]`` and evaluate those cells again, or quit the kernel and evaluate the notebook from the top.
 
@@ -75,6 +75,15 @@ MatrixUnit[{{1, 0}, {2, 0}, {1, 0}}, {{1, 0}, {1, 1}, {1, 0}}]   (* 8 x 8 matrix
 ```
 
 Every exported function has a usage message, so `?SchurTransform` describes a single function and ``?MixedSchurTools`*`` lists them all.
+
+## Validation
+
+Open each notebook in Wolfram's front end and choose Evaluation > Evaluate Notebook.
+The dimension identity in `Bratteli diagram.nb` and both matrix-unit checks in `Matrix Units.nb` should return `True`.
+In `v1/wba_gt_basis_demonstration.nb`, the generator relations should all hold, and the final tensor-space comparison should return `{True, True, True}`.
+In `v1/port-based teleportation.nb`, the ordinary and dilated generator checks should return `True`.
+The final dilated measurement's commutation table should contain only `yes`, and its spectra should contain only 0 and 1; multiplicities are shown in parentheses.
+The earlier, undilated measurement can have noncommuting elements.
 
 ## Conventions
 

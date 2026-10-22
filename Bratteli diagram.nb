@@ -1,58 +1,66 @@
 (* Content-type: application/vnd.wolfram.mathematica *)
 
 (*** Wolfram Notebook File ***)
-(* http://www.wolfram.com/nb *)
 
 Notebook[{
 Cell["Bratteli diagrams", "Title"],
 
 Cell["Walled Brauer algebra and unitary group", "Subtitle"],
 
-Cell["The Bratteli diagram of the algebra of partially transposed permutations acting on (\[DoubleStruckCapitalC]^d)^\[CircleTimes]n \[CircleTimes] (\[DoubleStruckCapitalC]^d*)^\[CircleTimes]m has the irreps for the first k tensor factors on level k. Its vertices are staircases: non-increasing lists of d integers whose positive entries form the left partition and whose negative entries form the reversed right partition.", "Text"],
+Cell["At level k, the Bratteli diagram of the algebra of partially transposed permutations records the irreps on the first k tensor factors. There are n left factors and m dual factors, each of dimension d. A vertex is a staircase: a non-increasing list of d integers whose positive entries form the left partition and whose negative entries form the reversed right partition.", "Text"],
 
 Cell["Setup", "Section"],
 
-Cell[BoxData[RowBox[{"Get", "[", RowBox[{"FileNameJoin", "[", RowBox[{"{", RowBox[{RowBox[{"NotebookDirectory", "[", "]"}], ",", "\"Mixed Schur Tools.wl\""}], "}"}], "]"}], "]"}]], "Input", InitializationCell->True],
+Cell["Choose Evaluation > Evaluate Notebook to run all examples from the top. The setup loads the package and the default parameters. Display helpers are grouped below; open that group only if you want to customize the presentation.", "Text"],
 
-Cell[BoxData[RowBox[{"{", RowBox[{"n", ",", "m", ",", "d"}], "}", "=", "{", RowBox[{"3", ",", "2", ",", "3"}], "}", ";"}]], "Input"],
+Cell[BoxData[RowBox[{"Get", "[", RowBox[{"FileNameJoin", "[", RowBox[{"{", RowBox[{RowBox[{"NotebookDirectory", "[", "]"}], ",", " ", "\"Mixed Schur Tools.wl\""}], "}"}], "]"}], "]"}]], "Input", InitializationCell -> True],
+
+Cell[BoxData[RowBox[{RowBox[{RowBox[{"{", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "}"}], " ", "=", " ", RowBox[{"{", RowBox[{"3", ",", " ", "2", ",", " ", "3"}], "}"}]}], ";"}]], "Input", InitializationCell -> True],
+
+Cell[CellGroupData[{Cell["Display helpers", "Subsection"], Cell[BoxData[RowBox[{RowBox[{"pathView", "[", "paths_", "]"}], " ", ":=", "\n", "  ", RowBox[{"Grid", "[", RowBox[{RowBox[{"Partition", "[", RowBox[{RowBox[{"MapIndexed", "[", RowBox[{RowBox[{RowBox[{"Column", "[", RowBox[{RowBox[{"{", RowBox[{RowBox[{"Style", "[", RowBox[{RowBox[{"Row", "[", RowBox[{"{", RowBox[{"\"path \"", ",", " ", RowBox[{"First", "[", "#2", "]"}]}], "}"}], "]"}], ",", " ", "Small"}], "]"}], ",", " ", RowBox[{"DisplayPath", "[", "\n", "    ", "#1", "]"}]}], "}"}], ",", " ", RowBox[{"Alignment", " ", "->", " ", "Center"}], ",", " ", RowBox[{"Spacings", " ", "->", " ", "0.6"}]}], "]"}], "&"}], ",", " ", "paths"}], "]"}], ",", " ", RowBox[{"UpTo", "[", "3", "]"}]}], "]"}], ",", " ", RowBox[{"Alignment", " ", "->", " ", "Center"}], ",", "\n", "     ", RowBox[{"Spacings", " ", "->", " ", RowBox[{"{", RowBox[{"2", ",", " ", "1.2"}], "}"}]}]}], "]"}]}]], "Input", InitializationCell -> True], Cell[BoxData[RowBox[{RowBox[{"patternView", "[", "p_", "]"}], " ", ":=", "\n", "  ", RowBox[{"Framed", "[", RowBox[{RowBox[{"Column", "[", RowBox[{RowBox[{RowBox[{"(", RowBox[{RowBox[{"Row", "[", RowBox[{"Riffle", "[", RowBox[{"#1", ",", " ", RowBox[{"Spacer", "[", "14", "]"}]}], "]"}], "]"}], "&"}], ")"}], " ", "/@", " ", RowBox[{"Reverse", "[", "p", "]"}]}], ",", " ", RowBox[{"Alignment", " ", "->", " ", "Center"}], ",", "\n", "     ", RowBox[{"Spacings", " ", "->", " ", "0.35"}]}], "]"}], ",", " ", RowBox[{"FrameStyle", " ", "->", " ", RowBox[{"GrayLevel", "[", "0.65", "]"}]}], ",", " ", RowBox[{"FrameMargins", " ", "->", " ", RowBox[{"{", RowBox[{RowBox[{"{", RowBox[{"10", ",", " ", "10"}], "}"}], ",", " ", RowBox[{"{", "\n", "    ", RowBox[{"6", ",", " ", "6"}], "}"}]}], "}"}]}]}], "]"}]}]], "Input", InitializationCell -> True]}, Closed]],
 
 Cell["Walled Brauer algebra", "Section"],
 
 Cell["Every vertex drawn as a staircase, the right partition to the left of the thick wall:", "Text"],
 
-Cell[BoxData[RowBox[{"BratteliDiagramWBALabelled", "[", RowBox[{"n", ",", "m", ",", "d"}], "]"}]], "Input"],
+Cell[BoxData[RowBox[{"BratteliDiagramWBALabelled", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}]], "Input"],
 
 Cell["A compact version; hover over a vertex to see its staircase:", "Text"],
 
-Cell[BoxData[RowBox[{"BratteliDiagramWBA", "[", RowBox[{"n", ",", "m", ",", "d"}], "]"}]], "Input"],
+Cell[BoxData[RowBox[{"BratteliDiagramWBA", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}]], "Input"],
 
 Cell["The number of vertices on each level:", "Text"],
 
-Cell[BoxData[RowBox[{"Length", "/@", "BratteliLevelsWBA", "[", RowBox[{"n", ",", "m", ",", "d"}], "]"}]], "Input"],
+Cell[BoxData[RowBox[{"Length", " ", "/@", " ", RowBox[{"BratteliLevelsWBA", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}]}]], "Input"],
 
 Cell["Irreps and their dimensions", "Section"],
 
 Cell["The irreps of the walled Brauer algebra and of U(d) that occur in the mixed Schur-Weyl duality, with their dimensions. The dimensions of the walled Brauer irreps are the numbers of paths in the Bratteli diagram:", "Text"],
 
-Cell[BoxData[{RowBox[{"irreps", "=", "Irreps", "[", RowBox[{"n", ",", "m", ",", "d"}], "]", ";"}], "\[IndentingNewLine]", RowBox[{"Grid", "[", RowBox[{RowBox[{"{", RowBox[{RowBox[{"\[IndentingNewLine]", "Prepend", "[", RowBox[{RowBox[{"DisplayStaircase", "/@", "irreps"}], ",", "\"\""}], "]"}], ",", RowBox[{"\[IndentingNewLine]", "Prepend", "[", RowBox[{RowBox[{"IrrepDimsWBA", "[", RowBox[{"n", ",", "m", ",", "d"}], "]"}], ",", "\"walled Brauer\""}], "]"}], ",", RowBox[{"\[IndentingNewLine]", "Prepend", "[", RowBox[{RowBox[{"IrrepDimsGL", "[", RowBox[{"n", ",", "m", ",", "d"}], "]"}], ",", "\"U(d)\""}], "]", "\[IndentingNewLine]"}]}], "}"}], ",", RowBox[{"Frame", "->", "All"}]}], "]"}]}], "Input"],
+Cell[BoxData[RowBox[{RowBox[{"irreps", " ", "=", " ", RowBox[{"Irreps", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}]}], ";"}]], "Input"],
+
+Cell[BoxData[RowBox[{"Grid", "[", RowBox[{RowBox[{"{", RowBox[{RowBox[{"Prepend", "[", RowBox[{RowBox[{"DisplayStaircase", " ", "/@", " ", "irreps"}], ",", " ", "\"\""}], "]"}], ",", " ", RowBox[{"Prepend", "[", RowBox[{RowBox[{"IrrepDimsWBA", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}], ",", " ", "\"walled Brauer\""}], "\n", "  ", "]"}], ",", " ", RowBox[{"Prepend", "[", RowBox[{RowBox[{"IrrepDimsGL", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}], ",", " ", "\"U(d)\""}], "]"}]}], "}"}], ",", " ", RowBox[{"Frame", " ", "->", " ", "All"}]}], "]"}]], "Input"],
 
 Cell["Together they account for the whole tensor space:", "Text"],
 
-Cell[BoxData[RowBox[{"IrrepDimsWBA", "[", RowBox[{"n", ",", "m", ",", "d"}], "]", ".", "IrrepDimsGL", "[", RowBox[{"n", ",", "m", ",", "d"}], "]", "==", "d", "^", "(", RowBox[{"n", "+", "m"}], ")"}]], "Input"],
+Cell[BoxData[RowBox[{RowBox[{RowBox[{"IrrepDimsWBA", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}], " ", ".", " ", RowBox[{"IrrepDimsGL", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}]}], " ", "==", " ", RowBox[{"d", " ", "^", " ", RowBox[{"(", RowBox[{"n", " ", "+", " ", "m"}], ")"}]}]}]], "Input"],
 
 Cell["The paths to one irrep, as pairs of mixed Young tableaux:", "Text"],
 
-Cell[BoxData[RowBox[{"DisplayPath", "/@", "PathsToIrrepWBA", "[", RowBox[{RowBox[{"irreps", "[", RowBox[{"[", "4", "]"}], "]"}], ",", "n", ",", "m", ",", "d"}], "]"}]], "Input"],
+Cell[BoxData[RowBox[{"pathView", "[", RowBox[{"PathsToIrrepWBA", "[", RowBox[{RowBox[{"irreps", "[", RowBox[{"[", "4", "]"}], "]"}], ",", " ", "n", ",", " ", "m", ",", " ", "d"}], "]"}], "]"}]], "Input"],
 
 Cell["Unitary group", "Section"],
 
-Cell["The Gelfand-Tsetlin basis of an irrep of U(d) is labelled by paths in the Bratteli diagram of U(1) \[Subset] U(2) \[Subset] \[Ellipsis] \[Subset] U(d), that is, by Gelfand-Tsetlin patterns. The diagram leading to the irreps above:", "Text"],
+Cell["The Gelfand-Tsetlin basis of an irrep of U(d) is labelled by paths in the Bratteli diagram of U(1) ⊂ U(2) ⊂ … ⊂ U(d), that is, by Gelfand-Tsetlin patterns. The diagram leading to the irreps above:", "Text"],
 
-Cell[BoxData[RowBox[{"BratteliDiagramGL", "[", RowBox[{"n", ",", "m", ",", "d"}], "]"}]], "Input"],
+Cell[BoxData[RowBox[{"BratteliDiagramGL", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}]], "Input"],
 
-Cell["The Gelfand-Tsetlin patterns of one irrep:", "Text"],
+Cell["The Gelfand-Tsetlin patterns of one irrep, with the highest-weight row at the top and interlacing rows below:", "Text"],
 
-Cell[BoxData[RowBox[{"GTPatterns", "[", RowBox[{"irreps", "[", RowBox[{"[", "4", "]"}], "]"}], "]", "//", "Column"}]], "Input"]
+Cell[BoxData[RowBox[{"Grid", "[", RowBox[{RowBox[{"Partition", "[", RowBox[{RowBox[{"patternView", " ", "/@", " ", RowBox[{"GTPatterns", "[", RowBox[{"irreps", "[", RowBox[{"[", "4", "]"}], "]"}], "]"}]}], ",", " ", RowBox[{"UpTo", "[", "4", "]"}]}], "]"}], ",", " ", RowBox[{"Spacings", " ", "->", " ", RowBox[{"{", RowBox[{"1", ",", "\n", "   ", "1"}], "}"}]}]}], "]"}]], "Input"]
 },
-StyleDefinitions->"Default.nb"
+CellContext -> Notebook,
+ShowAutoSpellCheck -> False,
+WindowSize -> {1120, 820},
+StyleDefinitions -> "Default.nb"
 ]

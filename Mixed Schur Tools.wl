@@ -189,8 +189,23 @@ stepCell[before_, after_] := With[{r = First@FirstPosition[Abs[after - before], 
 (* Staircases along a path of Bratteli diagram vertices {staircase, level}, without the root *)
 pathStaircases[vertices_] := Rest[vertices][[All, 1]]
 
+(* FindPath omits the trivial path from a vertex to itself, which is the unique path for an empty tensor product *)
+allPathsOfLength[graph_, root_, vertex_, length_] := If[length == 0,
+	If[root === vertex, {{root}}, {}],
+	FindPath[graph, root, vertex, {length}, All]
+]
+
+(* An empty path ends at the root staircase; its dimension must be supplied explicitly *)
+pathIrrep[T_, d_] := If[T === {}, zeroStaircase[d], Last@T]
+
 (* Vertex labels showing the staircase of every vertex as a tooltip *)
 tooltipLabels[vertices_, staircaseOf_] := Table[v -> Placed[DisplayStaircase@staircaseOf@v, Tooltip], {v, vertices}]
+
+(* Coordinates follow Catenate[levels], keeping the vertex and path ordering unchanged. *)
+centeredLevelCoordinates[levels_] := Catenate@MapIndexed[
+	Function[{level, index}, Table[{j - (Length@level + 1)/2, -0.85 (First@index - 1)}, {j, Length@level}]],
+	levels
+]
 
 
 (* ::Section:: *)
@@ -204,6 +219,7 @@ ToStaircase[{left_, right_, d_}] := If[Length@left + Length@right > d,
 
 ToPair[\[Lambda]_] := {Select[\[Lambda], # > 0 &], -Reverse@Select[\[Lambda], # < 0 &], Length@\[Lambda]}
 
+TransposePartition[{}] = {};
 TransposePartition[\[Lambda]_] := Table[Count[\[Lambda], row_ /; row >= i], {i, First@\[Lambda]}]
 
 AddCell[\[Lambda]_, i_] := \[Lambda] + UnitVector[Length@\[Lambda], i]
@@ -231,15 +247,20 @@ Enumerate[list_List] := MapIndexed[{#1, First@#2} &, list]
 (* Row i holds Abs[\[Lambda][[i]]] framed cells: to the right of the wall if \[Lambda][[i]] > 0, to its left if \[Lambda][[i]] < 0 *)
 DisplayStaircase[\[Lambda]_] := If[AllTrue[\[Lambda], # == 0 &],
 	"\[EmptySet]",
-	With[{wall = Max[0, -Min@\[Lambda]]},
+	With[{rows = Take[\[Lambda], Last@Flatten@Position[\[Lambda], Except[0], {1}]]},
+	With[{wall = Max[0, -Min@rows]},
 		Grid[
-			Table[ConstantArray[" ", Abs[row] + wall], {row, \[Lambda]}],
-			Dividers -> {{wall + 1 -> {Thick}}},
+			ConstantArray["", {Length@rows, wall + Max[0, Max@rows]}],
+			Alignment -> Center,
+			ItemSize -> {1.6, 1.3},
+			Spacings -> {0, 0},
+			Dividers -> {{wall + 1 -> Directive[AbsoluteThickness[2.5]]}},
 			Frame -> {None, None, Flatten@Table[
 				{i, j + wall} -> True,
-				{i, Length@\[Lambda]}, {j, Min[\[Lambda][[i]], 0] + 1, Max[\[Lambda][[i]], 0]}
+				{i, Length@rows}, {j, Min[rows[[i]], 0] + 1, Max[rows[[i]], 0]}
 			]}
 		]
+	]
 	]
 ]
 
@@ -270,25 +291,30 @@ BratteliDiagramWBA[n_, m_, d_] := BratteliDiagramWBA[n, m, d] = BratteliDiagramW
 BratteliDiagramWBA[levels_List] := With[{vertices = Catenate@levels},
 	RelationGraph[OrderWBA, vertices,
 		VertexSize -> 0.2,
-		VertexStyle -> LightBlue,
+		VertexStyle -> Automatic,
 		VertexLabels -> tooltipLabels[vertices, First],
-		GraphLayout -> "LayeredDigraphEmbedding",
-		ImageSize -> Small
+		VertexCoordinates -> centeredLevelCoordinates[levels],
+		ImagePadding -> 24,
+		ImageSize -> 400
 	]
 ]
 
-BratteliDiagramWBALabelled[n_, m_, d_] := With[{vertices = Catenate@BratteliLevelsWBA[n, m, d]},
+BratteliDiagramWBALabelled[n_, m_, d_] := With[{levels = BratteliLevelsWBA[n, m, d]},
+	With[{vertices = Catenate@levels},
 	RelationGraph[OrderWBA, vertices,
-		VertexSize -> 0.4,
+		VertexSize -> 0.55,
 		VertexShape -> Graphics[{Transparent, Disk[]}],
-		VertexStyle -> LightBlue,
+		VertexStyle -> Automatic,
 		VertexLabels -> Table[v -> Placed[DisplayStaircase@First@v, Center], {v, vertices}],
-		GraphLayout -> "LayeredDigraphEmbedding"
+		VertexCoordinates -> centeredLevelCoordinates[levels],
+		ImagePadding -> {{42, 42}, {28, 28}},
+		ImageSize -> 620
+	]
 	]
 ]
 
-PathsToIrrepWBA[\[Lambda]_, n_, m_, d_] := PathsToIrrepWBA[\[Lambda], n, m, d] = pathStaircases /@ FindPath[
-	BratteliDiagramWBA[n, m, d], {zeroStaircase[d], 0}, {\[Lambda], n + m}, {n + m}, All
+PathsToIrrepWBA[\[Lambda]_, n_, m_, d_] := PathsToIrrepWBA[\[Lambda], n, m, d] = pathStaircases /@ allPathsOfLength[
+	BratteliDiagramWBA[n, m, d], {zeroStaircase[d], 0}, {\[Lambda], n + m}, n + m
 ]
 
 IrrepDimWBA[\[Lambda]_, n_, m_, d_] := IrrepDimWBA[\[Lambda], n, m, d] = Length@PathsToIrrepWBA[\[Lambda], n, m, d]
@@ -296,7 +322,7 @@ IrrepDimWBA[\[Lambda]_, n_, m_, d_] := IrrepDimWBA[\[Lambda], n, m, d] = Length@
 AllPathsWBA[n_, m_, d_] := AllPathsWBA[n, m, d] = PathsToIrrepWBA[#, n, m, d] & /@ Irreps[n, m, d]
 
 AllPathsWBA[levels_List] := With[{graph = BratteliDiagramWBA@levels, root = First@First@levels},
-	Table[pathStaircases /@ FindPath[graph, root, vertex, {Length@levels - 1}, All], {vertex, Last@levels}]
+	Table[pathStaircases /@ allPathsOfLength[graph, root, vertex, Length@levels - 1], {vertex, Last@levels}]
 ]
 
 IrrepDimsWBA[n_, m_, d_] := IrrepDimsWBA[n, m, d] = Length /@ AllPathsWBA[n, m, d]
@@ -311,6 +337,7 @@ AssociationPathsToIrrepWBA[\[Lambda]_, n_, m_, d_] := AssociationPathsToIrrepWBA
 (*Mixed Young tableaux*)
 
 
+PathToYoungTableaux[{}] = {{}, {}};
 PathToYoungTableaux[T_] := Module[{path = withRoot@T, steps},
 	steps = Table[Append[stepCell[path[[i]], path[[i + 1]]], i], {i, Length@T}];
 	{
@@ -326,7 +353,10 @@ toTableau[cells_] := With[{positions = cells[[All, 1]]},
 
 DisplayYoungTableau[{}] := "\[EmptySet]"
 DisplayYoungTableau[tableau_] := Grid[
-	Map[StringRiffle[ToString /@ #, ","] &, tableau, {2}],
+	Map[Style[StringRiffle[ToString /@ #, ","], LineBreakWithin -> False] &, tableau, {2}],
+	Alignment -> Center,
+	ItemSize -> {Full, 1.3},
+	Spacings -> {0.6, 0},
 	Frame -> {None, None, Flatten[Table[{i, j} -> True, {i, Length@tableau}, {j, Length@tableau[[i]]}], 1]}
 ]
 
@@ -352,15 +382,16 @@ BratteliLevelsGL[n_, m_, d_] := BratteliLevelsGL[n, m, d] = Reverse@NestList[lev
 BratteliDiagramGL[n_, m_, d_] := BratteliDiagramGL[n, m, d] = With[{vertices = Catenate@BratteliLevelsGL[n, m, d]},
 	RelationGraph[OrderGL, vertices,
 		VertexSize -> 0.2,
-		VertexStyle -> LightRed,
+		VertexStyle -> Automatic,
 		VertexLabels -> tooltipLabels[vertices, Identity],
 		GraphLayout -> "LayeredDigraphEmbedding",
-		ImageSize -> Small
+		ImagePadding -> 24,
+		ImageSize -> 540
 	]
 ]
 
 AllGTPatterns[n_, m_, d_] := AllGTPatterns[n, m, d] = With[{graph = BratteliDiagramGL[n, m, d]},
-	Table[Rest /@ FindPath[graph, {}, \[Lambda], {d}, All], {\[Lambda], Irreps[n, m, d]}]
+	Table[Rest /@ allPathsOfLength[graph, {}, \[Lambda], d], {\[Lambda], Irreps[n, m, d]}]
 ]
 
 IrrepDimsGL[n_, m_, d_] := IrrepDimsGL[n, m, d] = WeylDim /@ Irreps[n, m, d]
@@ -434,7 +465,8 @@ RWcoef[{p1_, p2_}, {w1_, w2_}, {q1_, q2_}] := RWcoef[{p1, p2}, {w1, w2}, {q1, q2
 
 (* The rows above row Abs[x] are untouched by e_x, so they must coincide in P and Q *)
 CGcoef[P_, x_, Q_] := CGcoef[P, x, Q] = With[{d = Length@P, k = Abs@x, w = weightVectorPattern[x, Length@P]},
-	If[Take[P, k - 1] =!= Take[Q, k - 1],
+	If[k < 1 || k > d || Length@Q =!= d ||
+		stepPosition[Last@P, Last@Q, Sign@x] === None || Take[P, k - 1] =!= Take[Q, k - 1],
 		0,
 		Product[RWcoef[P[[i ;; i + 1]], w[[i ;; i + 1]], Q[[i ;; i + 1]]], {i, Max[k - 1, 1], d - 1}]
 	]
@@ -484,7 +516,7 @@ SchurBasis[n_, m_, d_] := SchurBasis[n, m, d] = Catenate@MapThread[
 
 (* The Schur basis is ordered by irrep l, then by path i, then by GT pattern j *)
 SchurIndex[{T_, P_}, n_, m_, d_] := Module[
-	{\[Lambda] = Last@T, dimsWBA = IrrepDimsWBA[n, m, d], dimsGL = IrrepDimsGL[n, m, d], l, i, j},
+	{\[Lambda] = pathIrrep[T, d], dimsWBA = IrrepDimsWBA[n, m, d], dimsGL = IrrepDimsGL[n, m, d], l, i, j},
 	l = AssociationIrrepsWBA[n, m, d][\[Lambda]];
 	i = AssociationPathsToIrrepWBA[\[Lambda], n, m, d][T];
 	j = AssociationGTPatterns[\[Lambda]][P];
@@ -494,17 +526,19 @@ SchurIndex[{T_, P_}, n_, m_, d_] := Module[
 StandardBasis[n_, d_] := StandardBasis[n, d] = Tuples[Range@d, n]
 
 (* Step k of the path couples the letter x_k to the irrep T_(k-1); the first factor is a 1 x dim(T_1) matrix *)
+CGmatProduct[{}, {}] = {1};
 CGmatProduct[x_List, T_List] := CGmatProduct[x, T] = With[{path = withRoot@T},
 	First[Dot @@ Table[CG[path[[k]], path[[k + 1]]][[x[[k]]]], {k, Length@T}]]
 ]
 
+SchurCoef[{}, {{}, P_List}] := Boole[AllTrue[Flatten@P, # === 0 &]]
 SchurCoef[x_List, {T_List, P_List}] := SchurCoef[x, {T, P}] = CGmatProduct[x, T][[AssociationGTPatterns[Last@T][P]]]
 
 (* Schur transform whose column for the string x is filled using the Schur basis vectors basisFor[x] *)
 schurTransform[n_, m_, d_, basisFor_] := With[{dim = d^(n + m)},
 	SparseArray[
 		Flatten@Table[
-			With[{x = IntegerDigits[column - 1, d, n + m] + 1},
+			With[{x = If[d == 1, ConstantArray[1, n + m], IntegerDigits[column - 1, d, n + m] + 1]},
 				Table[{SchurIndex[y, n, m, d], column} -> SchurCoef[x, y], {y, basisFor@x}]
 			],
 			{column, dim}
@@ -539,18 +573,13 @@ BratteliLevelsWBAString[x_, n_, m_, d_] := BratteliLevelsWBAString[x, n, m, d] =
 	]
 ]
 
-BratteliDiagramWBAString[x_, n_, m_, d_] := BratteliDiagramWBAString[x, n, m, d] = With[
-	{vertices = Catenate@BratteliLevelsWBAString[x, n, m, d]},
-	RelationGraph[OrderWBA, vertices,
-		GraphLayout -> "LayeredDigraphEmbedding",
-		VertexLabels -> tooltipLabels[vertices, First]
-	]
-]
+BratteliDiagramWBAString[x_, n_, m_, d_] := BratteliDiagramWBAString[x, n, m, d] =
+	BratteliDiagramWBA@BratteliLevelsWBAString[x, n, m, d]
 
 AllPathsWBAString[x_, n_, m_, d_] := With[{graph = BratteliDiagramWBAString[x, n, m, d]},
 	DeleteCases[
 		Table[
-			pathStaircases /@ FindPath[graph, {zeroStaircase[d], 0}, irrep, {n + m}, All],
+			pathStaircases /@ allPathsOfLength[graph, {zeroStaircase[d], 0}, irrep, n + m],
 			{irrep, Last@BratteliLevelsWBAString[x, n, m, d]}
 		],
 		{}
@@ -558,7 +587,7 @@ AllPathsWBAString[x_, n_, m_, d_] := With[{graph = BratteliDiagramWBAString[x, n
 ]
 
 SchurBasisGivenString[x_, n_, m_, d_] := With[{weight = Weight[x, n, m, d]},
-	Catenate[Tuples[{#, GTPatternsWeight[Last@First@#, weight]}] & /@ AllPathsWBAString[x, n, m, d]]
+	Catenate[Tuples[{#, GTPatternsWeight[pathIrrep[First@#, d], weight]}] & /@ AllPathsWBAString[x, n, m, d]]
 ]
 
 SchurTransform[n_, m_, d_] := SchurTransform[n, m, d] = schurTransform[n, m, d, SchurBasisGivenString[#, n, m, d] &]
@@ -569,9 +598,10 @@ SchurTransform[n_, m_, d_] := SchurTransform[n, m, d] = schurTransform[n, m, d, 
 
 
 (* Columns: the Schur basis vectors |T, P> for all GT patterns P of Last[T], in the standard basis *)
+schurVectors[{}] = Id[1];
 schurVectors[T_] := SparseArray[CGmatProduct[#, T] & /@ StandardBasis[Length@T, Length@Last@T]]
 
-MatrixUnit[T_, S_] := If[Last@T =!= Last@S,
+MatrixUnit[T_, S_] := If[If[T === {} || S === {}, T =!= S, Last@T =!= Last@S],
 	Message[MatrixUnit::irrep, T, S]; $Failed,
 	schurVectors[T] . Transpose@schurVectors[S]
 ]

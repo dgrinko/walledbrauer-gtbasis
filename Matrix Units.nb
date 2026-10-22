@@ -1,44 +1,62 @@
 (* Content-type: application/vnd.wolfram.mathematica *)
 
 (*** Wolfram Notebook File ***)
-(* http://www.wolfram.com/nb *)
 
 Notebook[{
 Cell["Matrix units in the Gelfand-Tsetlin basis", "Title"],
 
 Cell["The algebra of partially transposed permutations on the tensor space", "Subtitle"],
 
-Cell[TextData[{"For two paths T and S to the same irrep, the matrix unit E_(T,S) maps the Gelfand-Tsetlin basis vector S to T. On the tensor space (\[DoubleStruckCapitalC]^d)^\[CircleTimes]n \[CircleTimes] (\[DoubleStruckCapitalC]^d*)^\[CircleTimes]m it is the sum of |T, P\[RightAngleBracket]\[LeftAngleBracket]S, P| over all Gelfand-Tsetlin patterns P of the corresponding irrep of U(d). ", StyleBox["MatrixUnit", FontFamily->"Courier"], " builds it from products of Clebsch-Gordan tensors along the two paths."}], "Text"],
+Cell[TextData[{"For two paths T and S to the same irrep, the matrix unit E_(T,S) maps the Gelfand-Tsetlin basis vector S to T. On the mixed tensor space with n left and m dual factors of dimension d, it is the sum of |T, P〉〈S, P| over all Gelfand-Tsetlin patterns P of the corresponding irrep of U(d). ", StyleBox["MatrixUnit", FontFamily -> "Courier"], " builds it from products of Clebsch-Gordan tensors along the two paths."}], "Text"],
 
 Cell["Setup", "Section"],
 
-Cell[BoxData[RowBox[{"Get", "[", RowBox[{"FileNameJoin", "[", RowBox[{"{", RowBox[{RowBox[{"NotebookDirectory", "[", "]"}], ",", "\"Mixed Schur Tools.wl\""}], "}"}], "]"}], "]"}]], "Input", InitializationCell->True],
+Cell["Choose Evaluation > Evaluate Notebook to run all examples from the top. The setup loads the package and the default parameters. Display helpers are grouped below; open that group only if you want to customize the presentation.", "Text"],
+
+Cell[BoxData[RowBox[{"Get", "[", RowBox[{"FileNameJoin", "[", RowBox[{"{", RowBox[{RowBox[{"NotebookDirectory", "[", "]"}], ",", " ", "\"Mixed Schur Tools.wl\""}], "}"}], "]"}], "]"}]], "Input", InitializationCell -> True],
 
 Cell["Three left and one right tensor factor of dimension two, and the irrep with left partition {2} and empty right partition:", "Text"],
 
-Cell[BoxData[{RowBox[{"{", RowBox[{"n", ",", "m", ",", "d"}], "}", "=", "{", RowBox[{"3", ",", "1", ",", "2"}], "}", ";"}], "\[IndentingNewLine]", RowBox[{"\[Lambda]", "=", "{", RowBox[{"2", ",", "0"}], "}", ";"}], "\[IndentingNewLine]", RowBox[{"paths", "=", "PathsToIrrepWBA", "[", RowBox[{"\[Lambda]", ",", "n", ",", "m", ",", "d"}], "]"}]}], "Input"],
+Cell[BoxData[RowBox[{RowBox[{RowBox[{"{", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "}"}], " ", "=", " ", RowBox[{"{", RowBox[{"3", ",", " ", "1", ",", " ", "2"}], "}"}]}], ";"}]], "Input", InitializationCell -> True],
+
+Cell[CellGroupData[{Cell["Display helpers", "Subsection"], Cell[BoxData[RowBox[{RowBox[{"matrixView", "[", "a_", "]"}], " ", ":=", "\n", "  ", RowBox[{"MatrixForm", "[", "\n", "    ", RowBox[{RowBox[{"Map", "[", "\n", "      ", RowBox[{RowBox[{RowBox[{"If", "[", RowBox[{RowBox[{"TrueQ", "[", RowBox[{"#1", " ", "==", " ", "0"}], "]"}], ",", "\n", "        ", RowBox[{"Style", "[", RowBox[{"0", ",", " ", RowBox[{"GrayLevel", "[", "0.55", "]"}]}], "]"}], "\n", "        ", ",", "\n", "        ", "#1"}], "\n", "      ", "]"}], "&"}], "\n", "      ", ",", "\n", "      ", RowBox[{"Simplify", "[", RowBox[{"Normal", "[", "a", "]"}], "]"}], "\n", "      ", ",", "\n", "      ", RowBox[{"{", "2", "}"}]}], "\n", "    ", "]"}], "\n", "    ", ",", "\n", "    ", RowBox[{"TableSpacing", " ", "->", " ", RowBox[{"{", RowBox[{"0.7", ",", " ", "1.3"}], "}"}]}]}], "\n", "  ", "]"}]}]], "Input", InitializationCell -> True], Cell[BoxData[RowBox[{RowBox[{"pathView", "[", "paths_", "]"}], " ", ":=", "\n", "  ", RowBox[{"Grid", "[", RowBox[{RowBox[{"Partition", "[", RowBox[{RowBox[{"MapIndexed", "[", RowBox[{RowBox[{RowBox[{"Column", "[", RowBox[{RowBox[{"{", RowBox[{RowBox[{"Style", "[", RowBox[{RowBox[{"Row", "[", RowBox[{"{", RowBox[{"\"path \"", ",", " ", RowBox[{"First", "[", "#2", "]"}]}], "}"}], "]"}], ",", " ", "Small"}], "]"}], ",", " ", RowBox[{"DisplayPath", "[", "\n", "    ", "#1", "]"}]}], "}"}], ",", " ", RowBox[{"Alignment", " ", "->", " ", "Center"}], ",", " ", RowBox[{"Spacings", " ", "->", " ", "0.6"}]}], "]"}], "&"}], ",", " ", "paths"}], "]"}], ",", " ", RowBox[{"UpTo", "[", "3", "]"}]}], "]"}], ",", " ", RowBox[{"Alignment", " ", "->", " ", "Center"}], ",", "\n", "     ", RowBox[{"Spacings", " ", "->", " ", RowBox[{"{", RowBox[{"2", ",", " ", "1.2"}], "}"}]}]}], "]"}]}]], "Input", InitializationCell -> True]}, Closed]],
+
+Cell[BoxData[RowBox[{RowBox[{"λ", " ", "=", " ", RowBox[{"{", RowBox[{"2", ",", " ", "0"}], "}"}]}], ";"}]], "Input"],
+
+Cell[BoxData[RowBox[{RowBox[{"paths", " ", "=", " ", RowBox[{"PathsToIrrepWBA", "[", RowBox[{"λ", ",", " ", "n", ",", " ", "m", ",", " ", "d"}], "]"}]}], ";"}]], "Input"],
 
 Cell["The paths as pairs of mixed Young tableaux:", "Text"],
 
-Cell[BoxData[RowBox[{"DisplayPath", "/@", "paths"}]], "Input"],
+Cell[BoxData[RowBox[{"pathView", "[", "paths", "]"}]], "Input"],
 
 Cell["A matrix unit", "Section"],
 
-Cell[BoxData[{RowBox[{"e", "=", "MatrixUnit", "[", RowBox[{RowBox[{"paths", "[", RowBox[{"[", "1", "]"}], "]"}], ",", RowBox[{"paths", "[", RowBox[{"[", "2", "]"}], "]"}]}], "]", ";"}], "\[IndentingNewLine]", RowBox[{"e", "//", "MatrixForm"}]}], "Input"],
+Cell[BoxData[RowBox[{RowBox[{"e", " ", "=", " ", RowBox[{"MatrixUnit", "[", RowBox[{RowBox[{"paths", "[", RowBox[{"[", "1", "]"}], "]"}], ",", " ", RowBox[{"paths", "[", RowBox[{"[", "2", "]"}], "]"}]}], "]"}]}], ";"}]], "Input"],
 
-Cell["In the mixed Schur basis, E_(T,S) is the matrix unit |T\[RightAngleBracket]\[LeftAngleBracket]S| of the walled Brauer irrep tensored with the identity on the irrep of U(d):", "Text"],
+Cell[BoxData[RowBox[{"matrixView", "[", "e", "]"}]], "Input"],
 
-Cell[BoxData[{RowBox[{"schur", "=", "SchurTransform", "[", RowBox[{"n", ",", "m", ",", "d"}], "]", ";"}], "\[IndentingNewLine]", RowBox[{"schur", ".", "e", ".", "Transpose", "[", "schur", "]", "//", "MatrixForm"}]}], "Input"],
+Cell["In the mixed Schur basis, E_(T,S) is the matrix unit |T〉〈S| of the walled Brauer irrep tensored with the identity on the irrep of U(d):", "Text"],
+
+Cell[BoxData[RowBox[{RowBox[{"schur", " ", "=", " ", RowBox[{"SchurTransform", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}]}], ";"}]], "Input"],
+
+Cell[BoxData[RowBox[{"matrixView", "[", RowBox[{"schur", " ", ".", " ", "e", " ", ".", " ", RowBox[{"Transpose", "[", "schur", "]"}]}], "]"}]], "Input"],
 
 Cell["Relations", "Section"],
 
-Cell[TextData[{"Matrix units multiply as E_(T,S) E_(S',R) = \[Delta]_(S,S') E_(T,R). Since the entries are exact algebraic numbers, ", StyleBox["zeroQ", FontFamily->"Courier"], " tests a matrix for zero with ", StyleBox["PossibleZeroQ", FontFamily->"Courier"], ":"}], "Text"],
+Cell[TextData[{"Matrix units multiply as E_(T,S) E_(S',R) = δ_(S,S') E_(T,R). Since the entries are exact algebraic numbers, ", StyleBox["zeroQ", FontFamily -> "Courier"], " tests a matrix for zero with ", StyleBox["PossibleZeroQ", FontFamily -> "Courier"], ":"}], "Text"],
 
-Cell[BoxData[{RowBox[{"zeroQ", "[", "a_", "]", ":=", "AllTrue", "[", RowBox[{RowBox[{"Flatten", "@", "Normal", "@", "a"}], ",", "PossibleZeroQ"}], "]"}], "\[IndentingNewLine]", RowBox[{"units", "=", "Table", "[", RowBox[{RowBox[{"MatrixUnit", "[", RowBox[{"T", ",", "R"}], "]"}], ",", RowBox[{"{", RowBox[{"T", ",", "paths"}], "}"}], ",", RowBox[{"{", RowBox[{"R", ",", "paths"}], "}"}]}], "]", ";"}], "\[IndentingNewLine]", RowBox[{"AllTrue", "[", RowBox[{RowBox[{"Flatten", "@", "Table", "[", RowBox[{RowBox[{"\[IndentingNewLine]", "zeroQ", "[", RowBox[{"units", "[", RowBox[{"[", RowBox[{"i", ",", "j"}], "]"}], "]", ".", "units", "[", RowBox[{"[", RowBox[{"k", ",", "l"}], "]"}], "]", "-", "If", "[", RowBox[{RowBox[{"j", "==", "k"}], ",", RowBox[{"units", "[", RowBox[{"[", RowBox[{"i", ",", "l"}], "]"}], "]"}], ",", "0"}], "]"}], "]"}], ",", RowBox[{"\[IndentingNewLine]", "{", RowBox[{"i", ",", RowBox[{"Length", "@", "paths"}]}], "}"}], ",", RowBox[{"{", RowBox[{"j", ",", RowBox[{"Length", "@", "paths"}]}], "}"}], ",", RowBox[{"{", RowBox[{"k", ",", RowBox[{"Length", "@", "paths"}]}], "}"}], ",", RowBox[{"{", RowBox[{"l", ",", RowBox[{"Length", "@", "paths"}]}], "}"}]}], "]"}], ",", "TrueQ"}], "]"}]}], "Input"],
+Cell[BoxData[RowBox[{RowBox[{"zeroQ", "[", "a_", "]"}], " ", ":=", "\n", "  ", RowBox[{"AllTrue", "[", RowBox[{RowBox[{"Flatten", "[", RowBox[{"Normal", "[", "a", "]"}], "]"}], ",", " ", "PossibleZeroQ"}], "]"}]}]], "Input"],
+
+Cell[BoxData[RowBox[{RowBox[{"units", " ", "=", " ", RowBox[{"Table", "[", RowBox[{RowBox[{"MatrixUnit", "[", RowBox[{"T", ",", " ", "R"}], "]"}], ",", " ", RowBox[{"{", RowBox[{"T", ",", " ", "paths"}], "}"}], ",", " ", RowBox[{"{", RowBox[{"R", ",", " ", "paths"}], "}"}]}], "]"}]}], ";"}]], "Input"],
+
+Cell[BoxData[RowBox[{"AllTrue", "[", "\n", "  ", RowBox[{RowBox[{"Flatten", "[", "\n", "    ", RowBox[{"Table", "[", "\n", "      ", RowBox[{RowBox[{"zeroQ", "[", "\n", "        ", RowBox[{RowBox[{RowBox[{"units", "[", RowBox[{"[", RowBox[{"i", ",", " ", "j"}], "]"}], "]"}], " ", ".", " ", RowBox[{"units", "[", RowBox[{"[", RowBox[{"k", ",", " ", "l"}], "]"}], "]"}]}], " ", "-", "\n", "          ", RowBox[{"If", "[", RowBox[{RowBox[{"j", " ", "==", " ", "k"}], ",", "\n", "            ", RowBox[{"units", "[", RowBox[{"[", RowBox[{"i", ",", " ", "l"}], "]"}], "]"}], "\n", "            ", ",", "\n", "            ", "0"}], "\n", "          ", "]"}]}], "\n", "      ", "]"}], "\n", "      ", ",", "\n", "      ", RowBox[{"{", RowBox[{"i", ",", " ", RowBox[{"Length", "[", "paths", "]"}]}], "}"}], "\n", "      ", ",", "\n", "      ", RowBox[{"{", RowBox[{"j", ",", " ", RowBox[{"Length", "[", "paths", "]"}]}], "}"}], "\n", "      ", ",", "\n", "      ", RowBox[{"{", RowBox[{"k", ",", " ", RowBox[{"Length", "[", "paths", "]"}]}], "}"}], "\n", "      ", ",", "\n", "      ", RowBox[{"{", RowBox[{"l", ",", " ", RowBox[{"Length", "[", "paths", "]"}]}], "}"}]}], "\n", "    ", "]"}], "\n", "  ", "]"}], "\n", "  ", ",", "\n", "  ", "TrueQ"}], "\n", "]"}]], "Input"],
 
 Cell["The diagonal matrix units E_(T,T) of all irreps add up to the identity on the tensor space:", "Text"],
 
-Cell[BoxData[RowBox[{"Total", "[", RowBox[{"MatrixUnit", "[", RowBox[{"#", ",", "#"}], "]", "&", "/@", "Catenate", "@", "AllPathsWBA", "[", RowBox[{"n", ",", "m", ",", "d"}], "]"}], "]", "==", "IdentityMatrix", "[", RowBox[{"d", "^", "(", RowBox[{"n", "+", "m"}], ")"}], "]"}]], "Input"]
+Cell[BoxData[RowBox[{RowBox[{"Total", "[", RowBox[{RowBox[{"(", RowBox[{RowBox[{"MatrixUnit", "[", RowBox[{"#1", ",", " ", "#1"}], "]"}], "&"}], ")"}], " ", "/@", " ", RowBox[{"Catenate", "[", RowBox[{"AllPathsWBA", "[", RowBox[{"n", ",", " ", "m", ",", " ", "d"}], "]"}], "]"}]}], "]"}], " ", "==", " ", RowBox[{"IdentityMatrix", "[", "\n", "  ", RowBox[{"d", " ", "^", " ", RowBox[{"(", RowBox[{"n", " ", "+", " ", "m"}], ")"}]}], "]"}]}]], "Input"]
 },
-StyleDefinitions->"Default.nb"
+CellContext -> Notebook,
+ShowAutoSpellCheck -> False,
+WindowSize -> {1120, 820},
+StyleDefinitions -> "Default.nb"
 ]
