@@ -110,7 +110,7 @@ StandardBasis::usage = "StandardBasis[k, d] lists the strings of length k over {
 CGmatProduct::usage = "CGmatProduct[x, T] multiplies the Clebsch-Gordan tensors along the path T for the string x. Entry j of the result is the Schur transform coefficient <T, GTPatterns[Last[T]][[j]]|x>.";
 SchurCoef::usage = "SchurCoef[x, {T, P}] gives the mixed Schur transform coefficient <T, P|x>.";
 SchurTransformSlow::usage = "SchurTransformSlow[n, m, d] gives the d^(n+m)\[Times]d^(n+m) mixed Schur transform, computing every entry. Row i corresponds to SchurBasis[n, m, d][[i]], column j to StandardBasis[n + m, d][[j]].";
-SchurTransform::usage = "SchurTransform[n, m, d] gives the same matrix as SchurTransformSlow[n, m, d], but computes only the entries that can be non-zero.";
+SchurTransform::usage = "SchurTransform[n, m, d] gives the same matrix as SchurTransformSlow[n, m, d], assembling sparse Clebsch-Gordan blocks along the paths instead of computing entries separately.";
 
 GTPatternsWeight::usage = "GTPatternsWeight[\[Lambda], w] lists the Gelfand-Tsetlin patterns of \[Lambda] with weight w.";
 BratteliLevelsWBAString::usage = "BratteliLevelsWBAString[x, n, m, d] keeps only those vertices of BratteliLevelsWBA[n, m, d] whose U(d) irrep contains the weight of the prefix of the string x of the same length.";
@@ -185,9 +185,6 @@ stepCell[before_, after_] := With[{r = First@FirstPosition[Abs[after - before], 
 		True, {"right", {Length@after - r + 1, 1 - before[[r]]}}
 	]
 ]
-
-(* Staircases along a path of Bratteli diagram vertices {staircase, level}, without the root *)
-pathStaircases[vertices_] := Rest[vertices][[All, 1]]
 
 (* FindPath omits the trivial path from a vertex to itself, which is the unique path for an empty tensor product *)
 allPathsOfLength[graph_, root_, vertex_, length_] := If[length == 0,
@@ -313,19 +310,83 @@ BratteliDiagramWBALabelled[n_, m_, d_] := With[{levels = BratteliLevelsWBA[n, m,
 	]
 ]
 
-PathsToIrrepWBA[\[Lambda]_, n_, m_, d_] := PathsToIrrepWBA[\[Lambda], n, m, d] = pathStaircases /@ allPathsOfLength[
-	BratteliDiagramWBA[n, m, d], {zeroStaircase[d], 0}, {\[Lambda], n + m}, n + m
+(* Computation needs adjacency only, without constructing a styled Graph. Preserve vertex insertion order even
+   when custom outer levels differ from the stored level tags. The third list indexes the requested endpoints. *)
+wbaPathData[input_List] := wbaPathData[input] = Module[
+	{vertices = DeleteDuplicates@Catenate@input, firstTag, levels, terminalIndex, successors},
+	firstTag = Last@First@First@input;
+	levels = Table[Select[vertices, Last@# == firstTag + i &], {i, 0, Length@input - 1}];
+	terminalIndex = indexAssociation@Last@levels;
+	successors = Table[
+		Table[Reverse@Select[Range@Length@levels[[i + 1]], OrderWBA[vertex, levels[[i + 1, #]]] &],
+			{vertex, levels[[i]]}],
+		{i, Length@levels - 1}
+	];
+	{levels, successors, Replace[terminalIndex /@ Last@input, _Missing -> 0, {1}]}
 ]
 
-IrrepDimWBA[\[Lambda]_, n_, m_, d_] := IrrepDimWBA[\[Lambda], n, m, d] = Length@PathsToIrrepWBA[\[Lambda], n, m, d]
-
-AllPathsWBA[n_, m_, d_] := AllPathsWBA[n, m, d] = PathsToIrrepWBA[#, n, m, d] & /@ Irreps[n, m, d]
-
-AllPathsWBA[levels_List] := With[{graph = BratteliDiagramWBA@levels, root = First@First@levels},
-	Table[pathStaircases /@ allPathsOfLength[graph, root, vertex, Length@levels - 1], {vertex, Last@levels}]
+(* Descending successors reproduce FindPath's path order; endpoint groups keep the input's terminal order. *)
+wbaPathGroups[{levels_, successors_, terminals_}] := Module[{walk, groups, depth = Length@levels},
+	walk[level_, index_, prefix_] := If[level == depth,
+		Sow[prefix, index],
+		Scan[walk[level + 1, #, Append[prefix, levels[[level + 1, #, 1]]]] &, successors[[level, index]]]
+	];
+	groups = Association[Reap[walk[1, 1, {}], _, Rule][[2]]];
+	Table[If[i == 0, {}, Lookup[groups, i, {}]], {i, terminals}]
 ]
 
-IrrepDimsWBA[n_, m_, d_] := IrrepDimsWBA[n, m, d] = Length /@ AllPathsWBA[n, m, d]
+(* A single-irrep query first prunes vertices that cannot reach its endpoint. *)
+wbaPathsTo[{levels_, successors_, terminals_}, target_] := Module[
+	{reachable, index, walk, harvested, depth = Length@levels},
+	index = FirstPosition[Last@levels, target];
+	If[MissingQ@index, Return[{}]];
+	reachable = Table[{}, {depth}];
+	reachable[[-1]] = UnitVector[Length@Last@levels, First@index];
+	Do[
+		reachable[[level]] = Table[
+			Boole@AnyTrue[successors[[level, j]], reachable[[level + 1, #]] == 1 &],
+			{j, Length@levels[[level]]}],
+		{level, depth - 1, 1, -1}
+	];
+	If[reachable[[1, 1]] == 0, Return[{}]];
+	walk[level_, j_, prefix_] := If[level == depth,
+		Sow[prefix],
+		Scan[If[reachable[[level + 1, #]] == 1,
+			walk[level + 1, #, Append[prefix, levels[[level + 1, #, 1]]]]] &, successors[[level, j]]]
+	];
+	harvested = Reap[walk[1, 1, {}]][[2]];
+	If[harvested === {}, {}, First@harvested]
+]
+
+(* Count paths with integer dynamic programming instead of enumerating their exponentially larger list. *)
+wbaPathCounts[{levels_, successors_, terminals_}] := Module[
+	{counts = UnitVector[Length@First@levels, 1], next},
+	Do[
+		next = ConstantArray[0, Length@levels[[level + 1]]];
+		Do[Scan[(next[[#]] += counts[[vertex]]) &, successors[[level, vertex]]], {vertex, Length@counts}];
+		counts = next,
+		{level, Length@levels - 1}
+	];
+	Table[If[i == 0, 0, counts[[i]]], {i, terminals}]
+]
+
+PathsToIrrepWBA[\[Lambda]_, n_, m_, d_] := PathsToIrrepWBA[\[Lambda], n, m, d] =
+	wbaPathsTo[wbaPathData@BratteliLevelsWBA[n, m, d], {\[Lambda], n + m}]
+
+IrrepDimWBA[\[Lambda]_, n_, m_, d_] := IrrepDimWBA[\[Lambda], n, m, d] = With[
+	{index = AssociationIrrepsWBA[n, m, d][\[Lambda]]},
+	If[MissingQ@index, 0, IrrepDimsWBA[n, m, d][[index]]]
+]
+
+AllPathsWBA[n_, m_, d_] := AllPathsWBA[n, m, d] = Module[
+	{paths = wbaPathGroups[wbaPathData@BratteliLevelsWBA[n, m, d]]},
+	MapThread[(PathsToIrrepWBA[#1, n, m, d] = #2) &, {Irreps[n, m, d], paths}];
+	paths
+]
+
+AllPathsWBA[levels_List] := wbaPathGroups@wbaPathData@levels
+
+IrrepDimsWBA[n_, m_, d_] := IrrepDimsWBA[n, m, d] = wbaPathCounts[wbaPathData@BratteliLevelsWBA[n, m, d]]
 
 AssociationIrrepsWBA[n_, m_, d_] := AssociationIrrepsWBA[n, m, d] = indexAssociation@Irreps[n, m, d]
 
@@ -369,7 +430,8 @@ DisplayPath[T_] := DisplayYoungTableaux@PathToYoungTableaux@T
 (*Unitary group: Gelfand-Tsetlin patterns and Bratteli diagram*)
 
 
-InterlacingCandidates[\[Lambda]_] := Reverse@Sort@Tuples@Table[Range[\[Lambda][[i]], \[Lambda][[i + 1]], -1], {i, Length@\[Lambda] - 1}]
+(* Descending ranges already put the tuples in reverse lexicographic order. *)
+InterlacingCandidates[\[Lambda]_] := Tuples@Table[Range[\[Lambda][[i]], \[Lambda][[i + 1]], -1], {i, Length@\[Lambda] - 1}]
 
 OrderGL[\[Mu]_, \[Lambda]_] := Length@\[Lambda] == Length@\[Mu] + 1 &&
 	AllTrue[Most@\[Lambda] - \[Mu], NonNegative] && AllTrue[\[Mu] - Rest@\[Lambda], NonNegative]
@@ -551,7 +613,39 @@ SchurTransformSlow[n_, m_, d_] := SchurTransformSlow[n, m, d] = schurTransform[n
 
 
 (* ::Subsection:: *)
-(*Faster Schur transform: Bratteli diagram restricted to a string*)
+(*Sparse block assembly of the Schur transform*)
+
+
+(* Rows are {previous GT pattern, letter}, columns are new GT patterns; the letter varies fastest. *)
+cgBranchMatrix[\[Mu]_, \[Lambda]_] := Flatten[Transpose[CG[\[Mu], \[Lambda]], {2, 1, 3}], 1]
+
+(* Combine exact radical expressions once per distinct value, then remove canceled entries from sparse storage. *)
+simplifySparseValues[matrix_] := Module[{values = matrix["NonzeroValues"], unique, replacements},
+	unique = DeleteDuplicates@values;
+	replacements = AssociationThread[unique -> (Together /@ unique)];
+	SparseArray[Thread[matrix["NonzeroPositions"] -> Lookup[replacements, values]],
+		Dimensions@matrix, Together[matrix["ImplicitValue"]]]
+]
+
+(* Each block has standard-basis rows and GT-pattern columns. Share path prefixes during this call only,
+   then release the intermediate matrices; the package retains the compact CG tensors and final results. *)
+schurVectorBlocks[paths_, d_] := Module[{build, blocks},
+	build[{}] = Id[1];
+	build[T_List] := build[T] = With[{prefix = Most@T},
+		KroneckerProduct[build[prefix], Id[d]] . cgBranchMatrix[pathIrrep[prefix, d], Last@T]
+	];
+	blocks = build /@ paths;
+	Clear[build];
+	blocks
+]
+
+(* Stacking transposed path blocks keeps the original irrep, path, GT-pattern row order. *)
+SchurTransform[n_, m_, d_] := SchurTransform[n, m, d] =
+	simplifySparseValues[Join @@ (Transpose /@ schurVectorBlocks[Catenate@AllPathsWBA[n, m, d], d])]
+
+
+(* ::Subsection:: *)
+(*Bratteli diagram and basis restricted to a string*)
 
 
 (* ::Text:: *)
@@ -561,7 +655,10 @@ SchurTransformSlow[n_, m_, d_] := SchurTransformSlow[n, m, d] = schurTransform[n
 
 gtWeight[P_] := Differences@Prepend[Total /@ P, 0]
 
-GTPatternsWeight[\[Lambda]_, weight_] := Select[GTPatterns@\[Lambda], gtWeight@# === weight &]
+(* Group once per irrep, preserving the original order within every weight. *)
+gtPatternsByWeight[\[Lambda]_] := gtPatternsByWeight[\[Lambda]] = GroupBy[GTPatterns@\[Lambda], gtWeight]
+
+GTPatternsWeight[\[Lambda]_, weight_] := Lookup[gtPatternsByWeight[\[Lambda]], Key[weight], {}]
 
 BratteliLevelsWBAString[x_, n_, m_, d_] := BratteliLevelsWBAString[x, n, m, d] = With[{levels = BratteliLevelsWBA[n, m, d]},
 	Prepend[
@@ -576,34 +673,23 @@ BratteliLevelsWBAString[x_, n_, m_, d_] := BratteliLevelsWBAString[x, n, m, d] =
 BratteliDiagramWBAString[x_, n_, m_, d_] := BratteliDiagramWBAString[x, n, m, d] =
 	BratteliDiagramWBA@BratteliLevelsWBAString[x, n, m, d]
 
-AllPathsWBAString[x_, n_, m_, d_] := With[{graph = BratteliDiagramWBAString[x, n, m, d]},
-	DeleteCases[
-		Table[
-			pathStaircases /@ allPathsOfLength[graph, {zeroStaircase[d], 0}, irrep, n + m],
-			{irrep, Last@BratteliLevelsWBAString[x, n, m, d]}
-		],
-		{}
-	]
+AllPathsWBAString[x_, n_, m_, d_] := DeleteCases[
+	wbaPathGroups[wbaPathData@BratteliLevelsWBAString[x, n, m, d]], {}
 ]
 
 SchurBasisGivenString[x_, n_, m_, d_] := With[{weight = Weight[x, n, m, d]},
 	Catenate[Tuples[{#, GTPatternsWeight[pathIrrep[First@#, d], weight]}] & /@ AllPathsWBAString[x, n, m, d]]
 ]
 
-SchurTransform[n_, m_, d_] := SchurTransform[n, m, d] = schurTransform[n, m, d, SchurBasisGivenString[#, n, m, d] &]
-
-
 (* ::Subsection:: *)
 (*Matrix units*)
 
 
-(* Columns: the Schur basis vectors |T, P> for all GT patterns P of Last[T], in the standard basis *)
-schurVectors[{}] = Id[1];
-schurVectors[T_] := SparseArray[CGmatProduct[#, T] & /@ StandardBasis[Length@T, Length@Last@T]]
-
 MatrixUnit[T_, S_] := If[If[T === {} || S === {}, T =!= S, Last@T =!= Last@S],
 	Message[MatrixUnit::irrep, T, S]; $Failed,
-	schurVectors[T] . Transpose@schurVectors[S]
+	With[{blocks = schurVectorBlocks[{T, S}, If[T === {}, 1, Length@Last@T]]},
+		blocks[[1]] . Transpose[blocks[[2]]]
+	]
 ]
 
 

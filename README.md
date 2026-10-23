@@ -99,6 +99,20 @@ The earlier, undilated measurement can have noncommuting elements.
 
 Row `i` of `SchurTransform[n, m, d]` is the Schur basis vector `SchurBasis[n, m, d][[i]]`. Column `j` is the string `StandardBasis[n + m, d][[j]]`, so strings are in lexicographic order.
 
+## Computation and memory
+
+`SchurTransform` assembles sparse Clebsch–Gordan blocks along each path and shares common path prefixes during the calculation.
+The intermediate prefix matrices are released after each call.
+`SchurTransformSlow` provides the entry-by-entry calculation for comparison, and `SchurCoef` computes individual coefficients.
+All three use exact arithmetic and the same basis ordering.
+For exact matrix comparisons, simplify the difference, since multiplication order can change the forms of radical expressions.
+
+`IrrepDimsWBA` counts paths by integer dynamic programming, so dimension queries do not enumerate the basis paths.
+Path queries use adjacency lists; the diagram functions construct `Graph` objects for display.
+Queries restricted to a string reuse GT patterns grouped by weight.
+Many package functions cache their results; loading the package again with `Get` clears these caches.
+The full transform still has `d^(n+m)` rows and columns, so its output size limits the parameters that can be computed in memory.
+
 ## Function reference: `Mixed Schur Tools.wl`
 
 **Staircases and Young diagrams**
@@ -143,12 +157,12 @@ Row `i` of `SchurTransform[n, m, d]` is the Schur basis vector `SchurBasis[n, m,
 
 | Function | Description |
 | --- | --- |
-| `SchurTransform[n, m, d]` | The mixed Schur transform. Only entries that can be non-zero are computed. |
+| `SchurTransform[n, m, d]` | The mixed Schur transform, assembled from sparse Clebsch–Gordan blocks. |
 | `SchurTransformSlow[n, m, d]` | The same matrix, computed entry by entry. |
 | `SchurBasis`, `SchurIndex`, `StandardBasis` | Row and column labels of the transform. |
 | `SchurCoef[x, {T, P}]`, `CGmatProduct[x, T]` | Individual coefficients $\langle T, P \vert x\rangle$. |
 | `Weight`, `GTPatternsWeight` | $U(d)$ weights of strings and of GT patterns. |
-| `BratteliLevelsWBAString`, `BratteliDiagramWBAString`, `AllPathsWBAString`, `SchurBasisGivenString` | Bratteli diagram and Schur basis restricted to one string. This is what speeds up `SchurTransform`. |
+| `BratteliLevelsWBAString`, `BratteliDiagramWBAString`, `AllPathsWBAString`, `SchurBasisGivenString` | Bratteli diagram and Schur basis restricted to one string, for computing or inspecting the entries that can be non-zero. |
 
 **Gelfand–Tsetlin basis of the partially transposed permutations**
 
